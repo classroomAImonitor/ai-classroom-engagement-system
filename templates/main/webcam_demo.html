@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Webcam Demo - AI Classroom Engagement{% endblock %}
+
+{% block extra_css %}
+<style>
+    .webcam-section {
+        position: relative;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        border: 1px solid var(--glass-border);
+    }
+    
+    #webcam {
+        width: 100%;
+        height: auto;
+        display: block;
+        transform: scaleX(-1);
+    }
+    
+    #canvas-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        transform: scaleX(-1);
+    }
+    
+    .hud-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .hud-badge {
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 8px 16px;
+        border-radius: 50px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .scanline {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: rgba(14, 165, 164, 0.2);
+        top: 0;
+        z-index: 5;
+        animation: scan 4s linear infinite;
+    }
+    
+    @keyframes scan {
+        0% { top: 0; }
+        100% { top: 100%; }
+    }
+    
+    .animate-pulse-view {
+        animation: pulse-view 2s infinite;
+    }
+    
+    @keyframes pulse-view {
+        0% { opacity: 0.8; }
+        50% { opacity: 0.4; }
+        100% { opacity: 0.8; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-in">
+    <div class="glass-card mb-5">
+        <div class="text-center mb-4">
+            <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📸 30s Real-time HUD</h1>
+            <p style="color: var(--text-muted);">Instant AI behavior analysis via your local camera device.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Camera Column -->
+            <div class="col-lg-8">
+                <div class="webcam-section">
+                    <div class="scanline"></div>
+                    <video id="webcam" autoplay playsinline></video>
+                    <canvas id="canvas-overlay"></canvas>
+                    
+                    <div class="hud-overlay">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="hud-badge">
+                                <span class="animate-pulse-view" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
+                                LIVE FEED
+                            </div>
+                            <div id="countdown-timer" class="hud-badge" style="display: none; border-color: var(--primary);">
+                                <span id="timer-val">30s</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center" id="loading-overlay">
+                            <div class="spinner-border text-light mb-3" role="status"></div>
+                            <p class="text-light fw-bold">Connecting AI Lens...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button id="start-btn" class="glass-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Initialize Camera
+                    </button>
+                    <button id="record-btn" class="glass-btn" disabled>
+                        Start 30s Scan
+                    </button>
+                    <button id="stop-btn" class="glass-btn glass-btn-outline" disabled>
+                        Reset System
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Column -->
+            <div class="col-lg-4">
+                <!-- Live Stats -->
+                <div id="active-stats" class="glass-card h-100" style="background: var(--glass-surface);">
+                    <h5 style="font-weight: 800; margin-bottom: 1.5rem;">📊 Data Stream</h5>
+                    
+                    <div class="glass-card mb-4" style="background: rgba(0,0,0,0.05); text-align: center; border-style: dashed;">
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                            <div id="camera-status" style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8;"></div>
+                            <span id="status-text" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Offline</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="font-weight: 700; font-size: 0.8rem;">ENGAGEMENT</span>
+                            <span id="score-val" style="font-weight: 900; color: var(--primary);">0%</span>
+                        </div>
+                        <div class="progress" style="height: 12px; background: rgba(0,0,0,0.05); border-radius: 50px;">
+                            <div id="score-bar" class="progress-bar" style="width: 0%; background: var(--primary); border-radius: 50px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 glass-card" style="background: var(--glass-surface); border-left: 4px solid var(--primary);">
+                        <small style="display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Current Inference</small>
+                        <strong id="state-val" style="font-size: 1.1rem;">Waiting for signal...</strong>
+                    </div>
+                </div>
+
+                <!-- Result Card -->
+                <div id="result-card" class="glass-card h-100" style="display: none;">
+                    <h5 style="font-weight: 800; margin-bottom: 2rem;">📝 Scan Results</h5>
+                    
+                    <div class="text-center mb-4">
+                        <div style="font-size: 3rem; font-weight: 900; color: var(--primary);" id="final-score">0%</div>
+                        <small style="color: var(--text-muted); font-weight: 700;">AVG. PARTICIPATION</small>
+                    </div>
+
+                    <div id="distribution-container"></div>
+
+                    <div class="p-3 mt-4 glass-card" style="background: rgba(14, 165, 164, 0.05); font-size: 0.9rem;">
+                        <p id="analysis-summary" style="margin-bottom: 0; color: var(--text-muted);"></p>
+                    </div>
+
+                    <button id="reset-btn" class="glass-btn w-100 mt-4">Restart Scan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import {
+        FaceLandmarker,
+        FilesetResolver,
+        DrawingUtils
+    } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas-overlay');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('start-btn');
+    const recordBtn = document.getElementById('record-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const countdownTimer = document.getElementById('countdown-timer');
+    const timerVal = document.getElementById('timer-val');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const statusIndicator = document.getElementById('camera-status');
+    const statusText = document.getElementById('status-text');
+    const scoreVal = document.getElementById('score-val');
+    const scoreBar = document.getElementById('score-bar');
+    const stateVal = document.getElementById('state-val');
+    
+    const activeStats = document.getElementById('active-stats');
+    const resultCard = document.getElementById('result-card');
+    const finalScore = document.getElementById('final-score');
+    const analysisSummary = document.getElementById('analysis-summary');
+
+    let faceLandmarker;
+    let stream = null;
+    let lastVideoTime = -1;
+    let isRecording = false;
+    let recordedScores = [];
+    let stateHistory = { 'Attentive': 0, 'Sleepy': 0, 'Distracted': 0, 'Neutral': 0 };
+    let recordingTime = 30;
+    let timerInterval = null;
+    let animationId = null;
+
+    async function initializeFaceLandmarker() {
+        const filesetResolver = await FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+        faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: {
+                modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+                delegate: "GPU"
+            },
+            outputFaceBlendshapes: true,
+            runningMode: "VIDEO",
+            numFaces: 1
+        });
+    }
+
+    async function startCamera() {
+        try {
+            loadingOverlay.style.display = 'block';
+            if (!faceLandmarker) await initializeFaceLandmarker();
+
+            stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+            video.srcObject = stream;
+            
+            video.onloadedmetadata = () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                loadingOverlay.style.display = 'none';
+                startBtn.disabled = true;
+                recordBtn.disabled = false;
+                stopBtn.disabled = false;
+                statusIndicator.style.background = '#22c55e';
+                statusIndicator.style.boxShadow = '0 0 10px #22c55e';
+                statusText.innerText = 'Connected';
+                detectFaces();
+            };
+        } catch (err) {
+            console.error("Camera error:", err);
+        }
+    }
+
+    function startRecording() {
+        isRecording = true;
+        recordedScores = [];
+        stateHistory = { 'Attentive': 0, 'Sleepy': 0, 'Distracted': 0, 'Neutral': 0 };
+        recordingTime = 30;
+        
+        recordBtn.disabled = true;
+        countdownTimer.style.display = 'flex';
+        timerVal.innerText = '30s';
+
+        timerInterval = setInterval(() => {
+            recordingTime--;
+            timerVal.innerText = recordingTime + 's';
+            if (recordingTime <= 0) finishScan();
+        }, 1000);
+    }
+
+    function finishScan() {
+        isRecording = false;
+        clearInterval(timerInterval);
+        countdownTimer.style.display = 'none';
+        
+        const avg = recordedScores.length > 0 ? Math.round(recordedScores.reduce((a,b)=>a+b,0)/recordedScores.length) : 0;
+        finalScore.innerText = avg + '%';
+        
+        activeStats.style.display = 'none';
+        resultCard.style.display = 'block';
+        analysisSummary.innerText = avg > 70 ? "The scan indicates high engagement levels with consistent ocular focus." : "The scan detected periods of fatigue or distraction during the window.";
+    }
+
+    function resetSystem() {
+        if (stream) {
+            stream.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        }
+        cancelAnimationFrame(animationId);
+        clearInterval(timerInterval);
+        startBtn.disabled = false;
+        recordBtn.disabled = true;
+        stopBtn.disabled = true;
+        activeStats.style.display = 'block';
+        resultCard.style.display = 'none';
+        statusIndicator.style.background = '#94a3b8';
+        statusIndicator.style.boxShadow = 'none';
+        statusText.innerText = 'Offline';
+    }
+
+    function detectFaces() {
+        if (video.currentTime !== lastVideoTime) {
+            lastVideoTime = video.currentTime;
+            if (faceLandmarker) {
+                const res = faceLandmarker.detectForVideo(video, performance.now());
+                renderResults(res);
+            }
+        }
+        animationId = requestAnimationFrame(detectFaces);
+    }
+
+    function renderResults(res) {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if (res.faceLandmarks.length > 0) {
+            const landmarks = res.faceLandmarks[0];
+            const shapes = {};
+            res.faceBlendshapes[0].categories.forEach(s => shapes[s.categoryName] = s.score);
+
+            let score = 85;
+            let state = "Attentive";
+            let color = "#0EA5A4";
+
+            if (shapes['eyeBlinkLeft'] > 0.4) { score = 30; state = "Sleepy"; color = "#f59e0b"; }
+            else if (shapes['eyeLookInLeft'] > 0.4) { score = 50; state = "Distracted"; color = "#ef4444"; }
+
+            stateVal.innerText = state;
+            stateVal.style.color = color;
+            scoreVal.innerText = score + '%';
+            scoreBar.style.width = score + '%';
+            scoreBar.style.background = color;
+
+            if (isRecording) recordedScores.push(score);
+
+            // HUD Overlays
+            const bounds = getBounds(landmarks);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(bounds.x, bounds.y, bounds.w, bounds.h);
+        }
+    }
+
+    function getBounds(landmarks) {
+        let minX = 1, minY = 1, maxX = 0, maxY = 0;
+        landmarks.forEach(p => {
+            if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+        });
+        return {
+            x: minX * canvas.width, y: minY * canvas.height,
+            w: (maxX-minX) * canvas.width, h: (maxY-minY) * canvas.height
+        };
+    }
+
+    startBtn.addEventListener('click', startCamera);
+    recordBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', resetSystem);
+    resetBtn.addEventListener('click', () => { resetSystem(); startCamera(); });
+</script>
+{% endblock %}

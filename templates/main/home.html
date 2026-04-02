@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home - AI Classroom Engagement{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ---------- Glass Morphism Styles ---------- */
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        --primary-color: #6c5ce7;
+        --primary-dark: #5649c0;
+        --text-dark: #2d3436;
+        --text-light: #f5f6fa;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Glass card base */
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 1.5rem;
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
+    }
+
+    /* Hero section */
+    .hero {
+        background: rgba(108, 92, 231, 0.15);
+        backdrop-filter: blur(12px);
+        border-radius: 2rem;
+        padding: 4rem 2rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .hero .lead {
+        font-size: 1.2rem;
+        color: var(--text-dark);
+        opacity: 0.9;
+    }
+
+    .btn-glass {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        color: var(--primary-dark);
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-glass:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .btn-primary-glass {
+        background: var(--primary-color);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary-glass:hover {
+        background: var(--primary-dark);
+        transform: scale(1.05);
+    }
+
+    /* Engagement state cards */
+    .state-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        border-radius: 1.2rem;
+        transition: all 0.3s;
+    }
+
+    .state-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .state-card h5 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .state-card p {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    /* Feature icons */
+    .feature-icon {
+        font-size: 2rem;
+        background: rgba(255, 255, 255, 0.3);
+        width: 70px;
+        height: 70px;
+        line-height: 70px;
+        text-align: center;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(4px);
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    /* Demo placeholder */
+    .demo-placeholder {
+        background: rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(8px);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        border: 1px dashed rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2rem;
+        }
+
+        .hero {
+            padding: 2rem 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>🎓 AI Classroom Engagement</h1>
+        <p class="lead">Real‑time computer vision that detects student attention levels — helping educators create more
+            interactive and effective lessons.</p>
+        <div class="mt-4">
+            {% if user.is_authenticated %}
+            <a href="{% url 'videos:video_upload' %}" class="btn btn-primary-glass btn-lg mx-2 px-4">
+                <i class="fas fa-video me-2"></i> Upload Footage
+            </a>
+            <a href="{% url 'analytics' %}" class="btn btn-glass btn-lg mx-2 px-4">
+                <i class="fas fa-chart-line me-2"></i> View Analytics
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary-glass btn-lg mx-2 px-4">
+                <i class="fas fa-sign-in-alt me-2"></i> Login
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-glass btn-lg mx-2 px-4">
+                <i class="fas fa-user-plus me-2"></i> Register
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Engagement States (the 4 categories) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">What We Detect</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="state-card">
+                    <i class="fas fa-smile-wink" style="color: #2ecc71;"></i>
+                    <h5>Attentive</h5>
+                    <p>Students actively participating, making eye contact, and showing interest.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="state-card">
+                    <i class="fas fa-bed" style="color: #f39c12;"></i>
+                    <h5>Sleepy</h5>
+                    <p>Signs of fatigue: drooping eyelids, yawning, or resting heads.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="state-card">
+                    <i class="fas fa-mobile-alt" style="color: #e74c3c;"></i>
+                    <h5>Distracted</h5>
+                    <p>Looking away, using phones, or not following the lesson.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="state-card">
+                    <i class="fas fa-meh" style="color: #95a5a6;"></i>
+                    <h5>Neutral</h5>
+                    <p>Standard resting state – neither highly engaged nor clearly disengaged.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works (Computer Vision Pipeline) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">⚙️ How It Works</h2>
+        <div class="row">
+            <div class="col-md-3 text-center mb-4 animate">
+                <div class="feature-icon mx-auto">📹</div>
+                <h5>1. Capture</h5>
+                <p>Upload classroom CCTV footage or connect a live camera feed.</p>
+            </div>
+            <div class="col-md-3 text-center mb-4 animate" style="animation-delay: 0.1s;">
+                <div class="feature-icon mx-auto">🧠</div>
+                <h5>2. Analyze</h5>
+                <p>AI models detect faces, eye movement, posture, and expressions.</p>
+            </div>
+            <div class="col-md-3 text-center mb-4 animate" style="animation-delay: 0.2s;">
+                <div class="feature-icon mx-auto">📊</div>
+                <h5>3. Classify</h5>
+                <p>Each student is labeled as Attentive, Sleepy, Distracted, or Neutral.</p>
+            </div>
+            <div class="col-md-3 text-center mb-4 animate" style="animation-delay: 0.3s;">
+                <div class="feature-icon mx-auto">📈</div>
+                <h5>4. Report</h5>
+                <p>View real‑time dashboards and download detailed engagement reports.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Features (with glass cards) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">✨ Key Features</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="glass-card h-100 p-4">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h5>Real‑Time Analytics</h5>
+                        <p>Live engagement heatmaps and trends to adjust teaching on the fly.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="glass-card h-100 p-4">
+                    <div class="text-center">
+                        <i class="fas fa-file-alt fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h5>Automated Reports</h5>
+                        <p>Export PDF/CSV summaries for administrators and parents.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="glass-card h-100 p-4">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h5>Privacy First</h5>
+                        <p>All processing happens on‑premise; no video data leaves your institution.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="glass-card h-100 p-4">
+                    <div class="text-center">
+                        <i class="fas fa-chalkboard-teacher fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h5>Actionable Insights</h5>
+                        <p>Identify at‑risk students early and improve teaching methods.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benefits for Schools/Colleges & Students -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">🎯 Benefits</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="glass-card p-4 h-100">
+                    <i class="fas fa-school fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5>For Schools & Colleges</h5>
+                    <ul class="mt-3">
+                        <li>Enhance teaching effectiveness with data‑driven insights.</li>
+                        <li>Improve student outcomes by identifying engagement gaps.</li>
+                        <li>Provide evidence for curriculum adjustments and teacher training.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card p-4 h-100">
+                    <i class="fas fa-users fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5>For Students</h5>
+                    <ul class="mt-3">
+                        <li>More interactive lessons that hold attention.</li>
+                        <li>Early intervention when signs of fatigue or distraction appear.</li>
+                        <li>Greater overall engagement and interest in learning.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Stack (with icons) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">🛠️ Technology Stack</h2>
+        <div class="glass-card p-4 text-center">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <span class="badge bg-light text-dark p-3"><i class="fab fa-python me-2"></i>Python</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-eye me-2"></i>OpenCV</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-brain me-2"></i>TensorFlow</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-database me-2"></i>Django</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-chart-simple me-2"></i>Chart.js</span>
+            </div>
+            <p class="mt-3 mb-0">State‑of‑the‑art deep learning models ensure high accuracy in engagement detection.</p>
+        </div>
+    </div>
+
+    <!-- Demo Preview (Placeholder) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">📺 See It in Action</h2>
+        <div class="demo-placeholder">
+            <i class="fas fa-play-circle fa-4x mb-3" style="color: var(--primary-color);"></i>
+            <h5>Live Engagement Analysis</h5>
+            <p>Upload a sample video to see how our system detects attentive, sleepy, distracted, and neutral students
+                in real time.</p>
+            <a href="{% url 'videos:video_upload' %}" class="btn btn-primary-glass">Try Demo</a>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center mt-5">
+        <div class="glass-card p-4">
+            <h4>Ready to transform your classroom?</h4>
+            <p class="mb-3">Start using AI to understand student engagement and improve learning outcomes.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'videos:video_upload' %}" class="btn btn-primary-glass btn-lg px-5">Upload Your First
+                Video</a>
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-primary-glass btn-lg px-5">Get Started Free</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

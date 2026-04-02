@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Authentication - AI Classroom Engagement System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: var(--clay-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .auth-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .auth-card {
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-header h1 {
+            color: var(--clay-primary-dark);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .auth-header p {
+            color: var(--clay-text);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .auth-footer a {
+            color: var(--clay-primary-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    
+    <!-- Theme Script to prevent FOUC (Flash of Unstyled Content) -->
+    <script>
+        const savedTheme = localStorage.getItem('clayTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button id="themeToggleBtn" class="btn border-0 shadow-sm" style="position: absolute; top: 20px; right: 20px; border-radius: 50%; width: 38px; height: 38px; background: var(--clay-surface); box-shadow: var(--clay-shadow-outer) !important; color: var(--clay-text); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; z-index: 1000;">
+        🌓
+    </button>
+    
+    <div class="auth-container">
+        <div class="clay-card auth-card">
+            <div class="auth-header">
+                <h1>AI-Driven Classroom Engagement Monitoring System</h1>
+                <p>Using Computer Vision</p>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block auth_content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Apply clay-input to dynamically generated forms
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), select, textarea');
+            inputs.forEach(input => {
+                input.classList.add('clay-input');
+                // Remove form-control if it conflicts (though we styled form-control the same in styles.css)
+                // input.classList.remove('form-control');
+            });
+        });
+    </script>
+
+    {% block extra_js %}
+    {% endblock %}
+    
+    <!-- Theme Toggle Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                themeBtn.innerHTML = currentTheme === 'dark' ? '☀️' : '🌙';
+
+                themeBtn.addEventListener('click', () => {
+                    let theme = document.documentElement.getAttribute('data-theme');
+                    let newTheme = theme === 'dark' ? 'light' : 'dark';
+                    
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('clayTheme', newTheme);
+                    
+                    themeBtn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
+                    
+                    // Simple pop animation effect for clicking
+                    themeBtn.style.transform = 'scale(0.9)';
+                    setTimeout(() => themeBtn.style.transform = 'scale(1)', 150);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

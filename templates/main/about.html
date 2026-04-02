@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us - AI Classroom Engagement{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ---------- Glass Morphism Styles (Synced from Home) ---------- */
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        --primary-color: #6c5ce7;
+        --primary-dark: #5649c0;
+        --text-dark: #2d3436;
+        --text-light: #f5f6fa;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 1.5rem;
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
+    }
+
+    .hero {
+        background: rgba(108, 92, 231, 0.15);
+        backdrop-filter: blur(12px);
+        border-radius: 2rem;
+        padding: 4rem 2rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .btn-primary-glass {
+        background: var(--primary-color);
+        border: none;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-glass:hover {
+        background: var(--primary-dark);
+        transform: scale(1.05);
+        color: white;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        background: rgba(255, 255, 255, 0.3);
+        width: 70px;
+        height: 70px;
+        line-height: 70px;
+        text-align: center;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(4px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>📖 Our Project Vision</h1>
+        <p class="lead">Harnessing the power of Computer Vision to bridge the gap between digital analytics and physical classroom engagement.</p>
+    </div>
+
+    <!-- The Mission Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-7 animate">
+            <div class="glass-card p-5 h-100">
+                <h2 style="font-weight: 700; color: var(--primary-dark);" class="mb-4">🎯 Our Mission</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-dark);">
+                    The <strong>AI-Driven Classroom Engagement Monitoring System</strong> was conceptualized to address a core challenge in modern education: 
+                    the difficulty of tracking real-time attention levels in large classroom settings.
+                </p>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-dark);">
+                    Our mission is to provide educators with a non-intrusive, privacy-first tool that translates student micro-behaviors into actionable data, 
+                    allowing for early intervention and curriculum optimization.
+                </p>
+            </div>
+        </div>
+        <div class="col-lg-5 animate" style="animation-delay: 0.2s;">
+            <div class="glass-card p-5 h-100 text-center d-flex flex-column justify-content-center">
+                <div class="feature-icon mx-auto" style="background: var(--primary-color); color: white;">🧠</div>
+                <h3 style="font-weight: 700; color: var(--primary-dark);">The Neural Core</h3>
+                <p class="mb-0">Powered by OpenCV and MediaPipe, our system analyzes 468 facial landmarks to determine engagement states with high precision.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Values Section -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">🌟 Core Principles</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100">
+                    <i class="fas fa-shield-alt fa-3x mb-3" style="color: #27ae60;"></i>
+                    <h5>Privacy First</h5>
+                    <p>On-premise processing ensures that student video data never leaves the institution's local network.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100">
+                    <i class="fas fa-chart-line fa-3x mb-3" style="color: #6c5ce7;"></i>
+                    <h5>Data-Driven</h5>
+                    <p>Moving from intuition-based teaching to evidence-based pedagogical adjustments.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100">
+                    <i class="fas fa-users fa-3x mb-3" style="color: #f39c12;"></i>
+                    <h5>Student-Centric</h5>
+                    <p>Designed to help identify students who may be struggling with fatigue or lack of interest early on.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Stack (Synced with Home) -->
+    <div class="mb-5">
+        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">🛠️ Technology Under the Hood</h2>
+        <div class="glass-card p-4 text-center">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <span class="badge bg-light text-dark p-3"><i class="fab fa-python me-2"></i>Python</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-eye me-2"></i>OpenCV</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-brain me-2"></i>MediaPipe</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-database me-2"></i>Django</span>
+                <span class="badge bg-light text-dark p-3"><i class="fas fa-chart-simple me-2"></i>Chart.js</span>
+            </div>
+            <p class="mt-4 mb-0">Our architecture leverages distributed processing to ensure real-time latency even on standard hardware.</p>
+        </div>
+    </div>
+
+    <!-- Architect Section -->
+    <div class="mb-5">
+        <div class="glass-card p-5 text-center">
+            <h2 style="font-weight: 700; color: var(--primary-dark);" class="mb-4">👨‍💻 The Architect</h2>
+            <p style="font-size: 1.2rem; opacity: 0.8;">Designed and Developed by <strong>Sadiq</strong></p>
+            <p class="mx-auto" style="max-width: 600px;">
+                Combining expertise in full-stack development and computer vision to create tools that make a real difference in the classroom.
+            </p>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center mt-5">
+        <div class="glass-card p-4">
+            <h4>Want to see how it works?</h4>
+            <p class="mb-4">Experience the engagement detection engine right from your browser.</p>
+            <a href="{% url 'webcam_demo' %}" class="btn btn-primary-glass btn-lg px-5">Launch Webcam HUD</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

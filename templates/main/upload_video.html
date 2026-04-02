@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Upload Video - AI Classroom Engagement{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-in">
+    <div class="col-md-10 col-lg-8">
+        <div class="glass-card">
+            <div class="text-center mb-5">
+                <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📤 Upload Classroom Video</h1>
+                <p style="color: var(--text-muted);">Process and analyze classroom behavior using our advanced AI engine.</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="mt-4">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="{{ form.title.id_for_label }}" class="form-label" style="font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; display: block;">Video Title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback d-block text-danger mt-2 fw-bold">
+                            {{ form.title.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-5">
+                    <label for="{{ form.video_file.id_for_label }}" class="form-label" style="font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; display: block;">Select Video File</label>
+                    <div class="p-5 text-center glass-surface" style="border-radius: var(--radius-md); border: 2px dashed var(--glass-border); position: relative; transition: all 0.3s ease;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📁</div>
+                        {{ form.video_file }}
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">Drag and drop or click to browse</p>
+                    </div>
+                    {% if form.video_file.errors %}
+                        <div class="invalid-feedback d-block text-danger mt-2 fw-bold">
+                            {{ form.video_file.errors }}
+                        </div>
+                    {% endif %}
+                    <div class="mt-3 text-center" style="font-size: 0.85rem; color: var(--text-muted);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        Max file size: 500MB. Supported formats: MP4, AVI, MOV.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-5">
+                    <a href="{% url 'videos:video_list' %}" class="glass-btn glass-btn-outline" style="min-width: 150px; justify-content: center;">Cancel</a>
+                    <button type="submit" class="glass-btn" style="min-width: 220px; justify-content: center;">
+                        Upload & Analyze
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-5 pt-4" style="border-top: 1px solid var(--glass-border);">
+                <h5 class="mb-4 text-center" style="font-weight: 800; color: var(--text-main);">🧠 AI Analysis Features</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 glass-surface h-100" style="border-radius: var(--radius-md);">
+                            <div class="d-flex align-items-center gap-3">
+                                <span style="font-size: 1.5rem;">👨‍🎓</span>
+                                <div>
+                                    <strong style="display: block; font-size: 0.9rem;">Behavior Detection</strong>
+                                    <small style="color: var(--text-muted);">Analyzes focus and fatigue levels.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 glass-surface h-100" style="border-radius: var(--radius-md);">
+                            <div class="d-flex align-items-center gap-3">
+                                <span style="font-size: 1.5rem;">⚡</span>
+                                <div>
+                                    <strong style="display: block; font-size: 0.9rem;">Fast Processing</strong>
+                                    <small style="color: var(--text-muted);">Optimized for quick turnaround.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control {
+        background: var(--glass-bg);
+        backdrop-filter: blur(5px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: 0.8rem 1.2rem;
+        color: var(--text-main);
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        background: var(--glass-bg);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--primary-glow);
+        color: var(--text-main);
+    }
+</style>
+{% endblock %}

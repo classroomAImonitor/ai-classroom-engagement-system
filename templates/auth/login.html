@@ -1,0 +1,48 @@
+{% extends "auth_base.html" %}
+
+{% block title %}Login - AI Classroom Engagement System{% endblock %}
+
+{% block auth_content %}
+<form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label for="id_username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="id_username" name="username" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="id_password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="id_password" name="password" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="captcha" class="form-label">Captcha</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="captcha" placeholder="Enter captcha" required>
+            <span class="input-group-text bg-light">
+                <strong>A7X2</strong>
+            </span>
+        </div>
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe">
+        <label class="form-check-label" for="rememberMe">Remember me</label>
+    </div>
+    
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+    </div>
+</form>
+
+<div class="auth-footer">
+    <p class="mb-2">
+        <a href="{% url 'password_reset' %}">Forgot your password?</a>
+    </p>
+    <p class="mb-0">
+        Don't have an account? <a href="{% url 'register' %}">Join Neural Network</a>
+    </p>
+</div>
+{% endblock %}
+

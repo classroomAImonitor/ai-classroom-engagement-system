@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - AI Classroom Engagement{% endblock %}
+
+{% block content %}
+<div class="animate-in">
+    <div class="glass-card mb-5">
+        <div class="text-center mb-5">
+            <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📊 Engagement Analytics</h1>
+            <p style="color: var(--text-muted);">Comprehensive behavior analysis and participation metrics.</p>
+        </div>
+
+        {% if message %}
+        <div class="glass-card mb-5" style="background: rgba(14, 165, 164, 0.1); border-color: rgba(14, 165, 164, 0.2); text-align: center;">
+            <h5 style="color: var(--primary); font-weight: 700; margin-bottom: 1.5rem;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                {{ message }}
+            </h5>
+            <a href="{% url 'videos:video_upload' %}" class="glass-btn">Upload Video Now</a>
+        </div>
+        {% endif %}
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid mb-5">
+            <div class="glass-card stat-card-glass">
+                <span class="stat-emoji">👥</span>
+                <span class="stat-val" style="color: var(--primary);">{{ total_students }}</span>
+                <span class="stat-lab">Total Detected</span>
+            </div>
+            <div class="glass-card stat-card-glass">
+                <span class="stat-emoji">✅</span>
+                <span class="stat-val" style="color: #22c55e;">{{ attentive }}</span>
+                <span class="stat-lab">Attentive</span>
+            </div>
+            <div class="glass-card stat-card-glass">
+                <span class="stat-emoji">😴</span>
+                <span class="stat-val" style="color: #f59e0b;">{{ sleepy }}</span>
+                <span class="stat-lab">Sleepy</span>
+            </div>
+            <div class="glass-card stat-card-glass">
+                <span class="stat-emoji">👀</span>
+                <span class="stat-val" style="color: #ef4444;">{{ distracted }}</span>
+                <span class="stat-lab">Distracted</span>
+            </div>
+        </div>
+
+        <!-- Overall Score Section -->
+        <div class="glass-card mb-5" style="background: var(--glass-surface);">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <h5 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;">Engagement Score</h5>
+                    <div style="font-size: 3.5rem; font-weight: 900; color: var(--primary);">{{ engagement_percentage }}%</div>
+                </div>
+                <div class="col-md-8">
+                    <div class="progress" style="height: 24px; border-radius: 50px; background: rgba(0,0,0,0.05); padding: 4px;">
+                        <div id="engagementProgressBar" class="progress-bar" role="progressbar" style="border-radius: 50px; background: var(--primary); transition: width 1s ease;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="glass-card h-100">
+                    <h5 style="font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">📈</span> Behavior Distribution
+                    </h5>
+                    <div style="height: 300px;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="glass-card h-100">
+                    <h5 style="font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">📉</span> Trends Over Time
+                    </h5>
+                    <div style="height: 300px;">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neutral Info Area -->
+        <div class="glass-card mb-5" style="background: rgba(14, 165, 164, 0.05); border-style: dashed; text-align: center; padding: 1.5rem;">
+            <p style="margin-bottom: 0px; color: var(--text-muted);">
+                <strong style="color: var(--primary);">😐 Neutral Students: {{ neutral }}</strong> — Participants in a stable, resting state who are neither explicitly focused nor disengaged.
+            </p>
+        </div>
+
+        <!-- Analysis Controls -->
+        {% if video %}
+        <div class="pt-5 mt-4" style="border-top: 1px solid var(--glass-border);">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="{% url 'videos:video_export_csv' video.pk %}" class="glass-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m-7-5 4 4 4-4m-4-4v12"/></svg>
+                    Download CSV Report
+                </a>
+                <a href="{{ video.video_file.url }}" class="glass-btn glass-btn-outline">
+                    Preview Video
+                </a>
+                <a href="{% url 'videos:video_delete' video.pk %}" class="glass-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.2);" onclick="return confirm('Are you sure you want to permanently delete this analysis?');">
+                    Delete Data
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update Progress Bar
+        setTimeout(() => {
+            document.getElementById('engagementProgressBar').style.width = '{{ engagement_percentage }}%';
+        }, 300);
+
+        // Chart Data
+        const chartColors = {
+            primary: '#0EA5A4',
+            success: '#22C55E',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            muted: '#94A3B8'
+        };
+
+        const attentiveValue = Number('{{ attentive|default:"0" }}');
+        const sleepyValue = Number('{{ sleepy|default:"0" }}');
+        const distractedValue = Number('{{ distracted|default:"0" }}');
+        const neutralValue = Number('{{ neutral|default:"0" }}');
+
+        // Pie Chart
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Attentive', 'Sleepy', 'Distracted', 'Neutral'],
+                datasets: [{
+                    data: [attentiveValue, sleepyValue, distractedValue, neutralValue],
+                    backgroundColor: [chartColors.success, chartColors.warning, chartColors.danger, chartColors.muted],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 12, weight: '600' },
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim()
+                        }
+                    }
+                }
+            }
+        });
+
+        // Line Chart
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        const lineLabels = JSON.parse('{{ line_labels|default:"[]"|escapejs }}');
+        const lineValues = JSON.parse('{{ line_values|default:"[]"|escapejs }}');
+        
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: lineLabels.length ? lineLabels : ["0m", "5m", "10m", "15m", "20m"],
+                datasets: [{
+                    label: 'Engagement %',
+                    data: lineValues.length ? lineValues : [70, 75, 65, 80, 85],
+                    borderColor: chartColors.primary,
+                    backgroundColor: 'rgba(14, 165, 164, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: chartColors.primary
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { color: chartColors.muted }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: chartColors.muted }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

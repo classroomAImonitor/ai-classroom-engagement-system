@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Technical Documentation - Classroom AI Monitor{% endblock %}
+
+{% block content %}
+<div class="animate-in">
+    <div class="glass-card mb-5">
+        <div class="text-center mb-5">
+            <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📘 Technical Documentation</h1>
+            <p style="color: var(--text-muted);">Architecture, algorithms, and system specifications for the AI Engagement Portal.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3">
+                <div class="glass-card p-3 sticky-top" style="top: 100px; z-index: 10;">
+                    <nav class="nav flex-column gap-2">
+                        <a href="#overview" class="glass-link py-2" style="font-size: 0.85rem;">System Overview</a>
+                        <a href="#vision" class="glass-link py-2" style="font-size: 0.85rem;">Computer Vision Pipeline</a>
+                        <a href="#scoring" class="glass-link py-2" style="font-size: 0.85rem;">Engagement Scoring</a>
+                        <a href="#deployment" class="glass-link py-2" style="font-size: 0.85rem;">Deployment & Stack</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="col-lg-9">
+                <!-- Section 1: Overview -->
+                <section id="overview" class="mb-5">
+                    <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 1.5rem;">System Overview</h3>
+                    <p>
+                        The **Classroom AI Monitor** is a sophisticated monitoring framework designed to provide educators with non-intrusive, real-time analytics on student engagement. 
+                        By leveraging edge-based computer vision, the system identifies behavioral markers associated with attention, fatigue, and distraction.
+                    </p>
+                    <div class="glass-card mb-4" style="background: rgba(var(--primary-rgb), 0.03); border-left: 4px solid var(--primary);">
+                        <ul class="mb-0" style="list-style: none; padding-left: 0;">
+                            <li class="mb-2"><strong>Goal:</strong> Optimize classroom delivery through data-driven feedback.</li>
+                            <li><strong>Privacy:</strong> Localized processing ensures transient data handling.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Section 2: Vision Pipeline -->
+                <section id="vision" class="mb-5">
+                    <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 1.5rem;">Computer Vision Pipeline</h3>
+                    <p>
+                        Our vision pipeline utilizes the **MediaPipe Face Landmarker** solution, which provides high-fidelity face tracking even in low-light classroom environments.
+                    </p>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 glass-card h-100" style="background: rgba(var(--secondary-rgb), 0.05);">
+                                <h6 style="font-weight: 700;">Landmarking</h6>
+                                <p style="font-size: 0.85rem;" class="text-muted">478 3D landmarks are extracted per frame to monitor eye aspect ratios (EAR) and head pose orientation.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 glass-card h-100" style="background: rgba(var(--accent-rgb), 0.03);">
+                                <h6 style="font-weight: 700;">Blendshapes</h6>
+                                <p style="font-size: 0.85rem;" class="text-muted">Analyzing 52 blendshape categories to detect nuanced facial expressions like squinting or yawning.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Scoring Logic -->
+                <section id="scoring" class="mb-5">
+                    <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 1.5rem;">Engagement Scoring Algorithm</h3>
+                    <p>The engagement score is a weighted composite of several behavioral vectors:</p>
+                    <div class="table-responsive">
+                        <table class="table glass-surface" style="border-radius: 12px; overflow: hidden;">
+                            <thead style="background: rgba(var(--primary-rgb), 0.1);">
+                                <tr>
+                                    <th style="font-weight: 800; border: none;">Vector</th>
+                                    <th style="font-weight: 800; border: none;">Metric</th>
+                                    <th style="font-weight: 800; border: none;">Weight</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Gaze Consistency</td>
+                                    <td>Pupil Intersection</td>
+                                    <td>40%</td>
+                                </tr>
+                                <tr>
+                                    <td>Posture Alertness</td>
+                                    <td>Z-axis Stabilizer</td>
+                                    <td>30%</td>
+                                </tr>
+                                <tr>
+                                    <td>Ocular Refresh</td>
+                                    <td>Blink Frequency</td>
+                                    <td>30%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Section 4: Stack -->
+                <section id="deployment">
+                    <h3 style="font-weight: 800; color: var(--primary); margin-bottom: 1.5rem;">Systems Stack</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="tech-pill">Django 5.0</span>
+                        <span class="tech-pill">OpenCV 4.x</span>
+                        <span class="tech-pill">MediaPipe Tasks</span>
+                        <span class="tech-pill">SQLite 3</span>
+                        <span class="tech-pill">Chart.js 4.4</span>
+                        <span class="tech-pill">Bootstrap 5</span>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

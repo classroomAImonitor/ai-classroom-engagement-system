@@ -1,108 +1,379 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Reports - AI Classroom Engagement{% endblock %}
 
-{% block content %}
-<div class="animate-in">
-    <div class="glass-card mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📋 Engagement Reports</h1>
-                <p style="color: var(--text-muted); margin-bottom: 0;">Historical analysis data and session summaries.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{% url 'reports_export_csv' %}" class="glass-btn glass-btn-outline">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m-7-5 4 4 4-4m-4-4v12"/></svg>
-                    Export Global CSV
-                </a>
-                <button onclick="window.print()" class="glass-btn glass-btn-outline">
-                    🖨️ Print
-                </button>
-            </div>
-        </div>
-        
-        <div class="table-responsive glass-surface" style="border-radius: var(--radius-md); padding: 1rem;">
-            <table class="table table-hover align-middle" style="color: var(--text-main); margin-bottom: 0;">
-                <thead style="border-bottom: 2px solid var(--glass-border);">
-                    <tr style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th class="ps-3">Date</th>
-                        <th>Session Title</th>
-                        <th>Total</th>
-                        <th>Status Distribution</th>
-                        <th>Engagement</th>
-                        <th class="text-end pe-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in reports %}
-                    <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td class="ps-3"><span style="font-weight: 700;">{{ report.date|date:"M d, Y" }}</span></td>
-                        <td style="font-weight: 600;">{{ report.title|truncatewords:4 }}</td>
-                        <td><span class="badge" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);">{{ report.total }}</span></td>
-                        <td>
-                            <div class="d-flex gap-1">
-                                <span style="background: rgba(34, 197, 94, 0.15); color: #22c55e; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 0.7rem; font-weight: 700;" title="Attentive">{{ report.attentive }}</span>
-                                <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 0.7rem; font-weight: 700;" title="Sleepy">{{ report.sleepy }}</span>
-                                <span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 0.7rem; font-weight: 700;" title="Distracted">{{ report.distracted }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <span style="font-weight: 800; font-size: 0.85rem; min-width: 40px; color: {% if report.engagement >= 70 %}#22c55e{% elif report.engagement >= 50 %}#f59e0b{% else %}#ef4444{% endif %};">
-                                    {{ report.engagement }}%
-                                </span>
-                                <div class="progress" style="height: 6px; border-radius: 10px; background: rgba(0,0,0,0.05); width: 60px; overflow: hidden;">
-                                    <div class="progress-bar" style="width: {{ report.engagement }}%; background: {% if report.engagement >= 70 %}#22c55e{% elif report.engagement >= 50 %}#f59e0b{% else %}#ef4444{% endif %};"></div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="text-end pe-3">
-                            <div class="d-flex justify-content-end gap-2">
-                                <a href="{% url 'analytics_detail' report.id %}" class="glass-btn glass-btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">Details</a>
-                                <a href="{% url 'videos:video_delete' report.id %}" class="glass-btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: rgba(239, 68, 68, 0.1); color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.2);" onclick="return confirm('Delete this report?');">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <h5 style="font-weight: 700;">No reports found</h5>
-                            <p>Analysis data will appear here once videos are processed.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- Summary Statistics -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="glass-card text-center p-3">
-                <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 0.5rem;">Sessions</p>
-                <h3 style="font-weight: 900; margin-bottom: 0;">{{ reports|length }}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="glass-card text-center p-3">
-                <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 0.5rem;">Avg. Engagement</p>
-                <h3 style="font-weight: 900; margin-bottom: 0; color: #22c55e;">{{ avg_engagement }}%</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="glass-card text-center p-3">
-                <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 0.5rem;">Peak</p>
-                <h3 style="font-weight: 900; margin-bottom: 0; color: var(--primary);">{{ best_engagement }}%</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="glass-card text-center p-3">
-                <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 0.5rem;">Total Managed</p>
-                <h3 style="font-weight: 900; margin-bottom: 0;">{{ total_students_stat }}</h3>
-            </div>
-        </div>
-    </div>
-</div>
+{% block extra_css %}
+<style>
+:root {
+  --bg-base:      #D6E6F5;
+  --bg-mid:       #C2D8EE;
+  --fog:          #E0EDF7;
+  --white:        #FFFFFF;
+  --navy:         #1A3A5C;
+  --navy-mid:     #2B5282;
+  --navy-light:   #3A6FA8;
+  --steel:        #5B8DB8;
+  --steel-light:  #87B3D4;
+  --sky:          #A8CCE8;
+  --sky-light:    #C8E0F0;
+  --text-dark:    #1A3050;
+  --text-mid:     #3B6080;
+  --text-muted:   #7A9DB8;
+  --green:        #2E8B6A;
+  --green-bg:     rgba(46,139,106,0.1);
+  --red:          #C0392B;
+  --red-bg:       rgba(192,57,43,0.08);
+  --amber:        #B07A2A;
+  --amber-bg:     rgba(176,122,42,0.1);
+  --purple:       #5B4A8A;
+  --purple-bg:    rgba(91,74,138,0.1);
+  --shadow-sm:    0 2px 12px rgba(26,58,92,0.07);
+  --shadow-md:    0 6px 24px rgba(26,58,92,0.11);
+  --shadow-lg:    0 16px 48px rgba(26,58,92,0.15);
+  --r:            14px;
+  --r-sm:         9px;
+  --r-lg:         20px;
+  --r-xl:         26px;
+  --font:         'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-dark);
+  font-family: var(--font);
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-mid); }
+::-webkit-scrollbar-thumb { background: var(--steel-light); border-radius: 10px; }
+
+.page { padding: 2rem 2.25rem 3rem; max-width: 1440px; margin: 0 auto; }
+
+/* ══ PAGE HEADER ══ */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;
+}
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: .42rem;
+  background: rgba(91,141,184,0.1); border: 1px solid rgba(91,141,184,0.22);
+  border-radius: 20px; padding: .22rem .75rem; font-size: .62rem; font-weight: 700;
+  color: var(--steel); letter-spacing: .5px; text-transform: uppercase;
+  margin-bottom: .5rem; width: fit-content;
+}
+.page-title { font-family: var(--font-display); font-size: clamp(1.6rem,2.8vw,2.2rem); color: var(--text-dark); margin-bottom: .25rem; }
+.page-sub { font-size: .82rem; color: var(--text-muted); line-height: 1.6; }
+.page-header-actions { display: flex; gap: .65rem; flex-wrap: wrap; align-items: center; }
+
+/* ══ BUTTONS ══ */
+.btn {
+  display: inline-flex; align-items: center; gap: .42rem; padding: .62rem 1.3rem;
+  border-radius: var(--r-sm); font-family: var(--font); font-size: .8rem; font-weight: 600;
+  text-decoration: none; cursor: pointer; border: none; transition: all .28s cubic-bezier(.2,.8,.2,1);
+  position: relative; overflow: hidden;
+}
+.btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.12); opacity: 0; transition: opacity .2s; }
+.btn:hover::after { opacity: 1; }
+.btn i { transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.btn:hover i { transform: scale(1.1); }
+.btn-primary { background: var(--navy); color: #fff; box-shadow: 0 4px 14px rgba(26,58,92,0.2); }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(26,58,92,0.28); }
+.btn-outline { background: var(--white); color: var(--text-mid); border: 1px solid rgba(91,141,184,0.22); box-shadow: var(--shadow-sm); }
+.btn-outline:hover { background: var(--fog); transform: translateY(-2px); }
+.btn-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(176,122,42,0.2); }
+.btn-amber:hover { background: rgba(176,122,42,0.18); transform: translateY(-2px); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(192,57,43,0.2); }
+.btn-danger:hover { background: rgba(192,57,43,0.15); transform: translateY(-2px); }
+
+/* ══ KPI ROW ══ */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.1rem; margin-bottom: 1.75rem; }
+.kpi {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-lg); padding: 1.4rem 1.5rem;
+  position: relative; overflow: hidden;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s;
+  box-shadow: var(--shadow-sm); cursor: default;
+}
+.kpi:hover { transform: translateY(-5px) scale(1.01); box-shadow: var(--shadow-md); }
+.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.kpi.k1::before { background: linear-gradient(90deg,var(--navy),var(--steel)); }
+.kpi.k2::before { background: linear-gradient(90deg,var(--green),#52C99A); }
+.kpi.k3::before { background: linear-gradient(90deg,var(--navy-light),var(--sky)); }
+.kpi.k4::before { background: linear-gradient(90deg,var(--purple),#8B77C8); }
+.ki { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: .82rem; margin-bottom: .85rem; transition: transform .3s; }
+.kpi:hover .ki { transform: rotate(-8deg) scale(1.1); }
+.ki.b { background: rgba(26,58,92,0.08); color: var(--navy); }
+.ki.g { background: var(--green-bg); color: var(--green); }
+.ki.s { background: rgba(91,141,184,0.1); color: var(--steel); }
+.ki.p { background: var(--purple-bg); color: var(--purple); }
+.kv { font-family: var(--font-display); font-size: 2.1rem; line-height: 1; color: var(--text-dark); margin-bottom: .18rem; }
+.kl { font-size: .62rem; font-weight: 600; color: var(--text-muted); letter-spacing: .5px; text-transform: uppercase; }
+
+/* ══ TABLE CARD ══ */
+.table-card {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-xl); box-shadow: var(--shadow-md);
+  overflow: hidden; margin-bottom: 1.75rem;
+}
+.table-card-header {
+  padding: 1.4rem 2rem;
+  border-bottom: 1px solid rgba(91,141,184,0.1);
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--fog);
+}
+.table-card-header-title { font-size: .62rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+
+/* Table */
+.reports-table { width: 100%; border-collapse: collapse; }
+.reports-table thead th {
+  padding: .9rem 1.1rem;
+  font-size: .6rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(91,141,184,0.12);
+  background: var(--fog);
+  white-space: nowrap;
+}
+.reports-table thead th:first-child { padding-left: 2rem; }
+.reports-table thead th:last-child  { padding-right: 2rem; text-align: right; }
+
+.reports-table tbody tr {
+  border-bottom: 1px solid rgba(91,141,184,0.08);
+  transition: background .2s;
+}
+.reports-table tbody tr:last-child { border-bottom: none; }
+.reports-table tbody tr:hover { background: var(--fog); }
+.reports-table tbody td { padding: 1rem 1.1rem; vertical-align: middle; }
+.reports-table tbody td:first-child { padding-left: 2rem; }
+.reports-table tbody td:last-child  { padding-right: 2rem; text-align: right; }
+
+/* Table cell elements */
+.date-cell { font-size: .82rem; font-weight: 600; color: var(--text-mid); white-space: nowrap; }
+.type-badge {
+  display: inline-flex; align-items: center; gap: .28rem;
+  padding: .22rem .62rem; border-radius: 20px; font-size: .58rem; font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; white-space: nowrap;
+}
+.type-badge.video  { background: rgba(26,58,92,0.08);  color: var(--navy);  border: 1px solid rgba(26,58,92,0.12); }
+.type-badge.webcam { background: var(--green-bg); color: var(--green); border: 1px solid rgba(46,139,106,0.15); }
+.title-cell { font-size: .88rem; font-weight: 600; color: var(--text-dark); }
+.vol-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--fog); border: 1px solid rgba(91,141,184,0.18);
+  border-radius: var(--r-sm); padding: .25rem .65rem;
+  font-size: .78rem; font-weight: 700; color: var(--text-mid); font-family: var(--font-mono);
+}
+.behavior-group { display: flex; gap: .35rem; align-items: center; }
+.bsq {
+  width: 30px; height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm); font-size: .72rem; font-weight: 700;
+}
+.bsq.g { background: var(--green-bg);  color: var(--green); }
+.bsq.a { background: var(--amber-bg);  color: var(--amber); }
+.bsq.r { background: var(--red-bg);    color: var(--red);   }
+
+/* Progress inline */
+.perf-cell { display: flex; align-items: center; gap: .75rem; }
+.perf-val { font-size: .82rem; font-weight: 700; color: var(--text-dark); min-width: 38px; font-family: var(--font-mono); }
+.perf-track { height: 6px; background: var(--fog); border: 1px solid rgba(91,141,184,0.15); border-radius: 10px; overflow: hidden; width: 80px; }
+.perf-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg,var(--navy),var(--steel-light)); }
+
+/* Ops cell */
+.ops-cell { display: flex; gap: .45rem; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Empty row */
+.empty-row td { padding: 4rem 2rem; text-align: center; color: var(--text-muted); }
+.empty-row i { font-size: 2.5rem; color: var(--sky); display: block; margin-bottom: .75rem; }
+.empty-row h6 { font-size: .88rem; font-weight: 600; color: var(--text-mid); }
+
+/* ══ ANIMATIONS ══ */
+.fu { opacity: 0; transform: translateY(16px); animation: fadeUp .6s cubic-bezier(.19,1,.22,1) forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+.d1{animation-delay:.05s} .d2{animation-delay:.11s} .d3{animation-delay:.18s}
+.d4{animation-delay:.25s} .d5{animation-delay:.32s}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){ .kpi-row { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:800px){
+  .page { padding: 1rem 1rem 2rem; }
+  .kpi-row { grid-template-columns: 1fr; }
+  .reports-table thead th:nth-child(n+4),
+  .reports-table tbody td:nth-child(n+4) { display: none; }
+}
+</style>
 {% endblock %}
 
+{% block content %}
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header fu d1">
+    <div>
+      <div class="page-eyebrow"><i class="fas fa-file-signature"></i>Historical Repository</div>
+      <h1 class="page-title">Engagement Reports</h1>
+      <p class="page-sub">Neural analysis summaries across all recorded classroom sessions.</p>
+    </div>
+    <div class="page-header-actions">
+      <a href="{% url 'reports_export_csv' %}" class="btn btn-outline"><i class="fas fa-file-csv"></i>Export Global Data</a>
+      <button onclick="window.print()" class="btn btn-outline"><i class="fas fa-print"></i>Print</button>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+      <div class="fu d1" style="margin-bottom: 1.5rem;">
+          {% for message in messages %}
+              <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert" style="border-radius: var(--r-sm); font-size: 0.82rem; background: var(--white); border: 1px solid rgba(91,141,184,0.2);">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+          {% endfor %}
+      </div>
+  {% endif %}
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi k1 fu d2">
+      <div class="ki b"><i class="fas fa-folder-open"></i></div>
+      <div class="kv">{{ reports|length }}</div>
+      <div class="kl">Managed Sessions</div>
+    </div>
+    <div class="kpi k2 fu d3">
+      <div class="ki g"><i class="fas fa-chart-line"></i></div>
+      <div class="kv">{{ avg_engagement }}%</div>
+      <div class="kl">Institutional Avg</div>
+    </div>
+    <div class="kpi k3 fu d4">
+      <div class="ki s"><i class="fas fa-trophy"></i></div>
+      <div class="kv">{{ best_engagement }}%</div>
+      <div class="kl">Peak Performance</div>
+    </div>
+    <div class="kpi k4 fu d5">
+      <div class="ki p"><i class="fas fa-users"></i></div>
+      <div class="kv">{{ total_students_stat }}</div>
+      <div class="kl">Total Observations</div>
+    </div>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="table-card fu d3">
+    <div class="table-card-header">
+      <i class="fas fa-table" style="color:var(--text-muted);font-size:.72rem;"></i>
+      <span class="table-card-header-title">Session Records</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="reports-table">
+        <thead>
+          <tr>
+            <th>Reference Date</th>
+            <th>Type</th>
+            <th>Session Context</th>
+            <th>Volume</th>
+            <th>Behavior Distribution</th>
+            <th>Performance Index</th>
+            <th>Operations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td><span class="date-cell">{{ report.date|date:"M d, Y" }}</span></td>
+            <td>
+              {% if report.type == 'video' %}
+              <span class="type-badge video"><i class="fas fa-video"></i>Video</span>
+              {% else %}
+              <span class="type-badge webcam"><i class="fas fa-camera"></i>Webcam</span>
+              {% endif %}
+            </td>
+            <td><span class="title-cell">{{ report.title }}</span></td>
+            <td><span class="vol-badge">{{ report.total }}</span></td>
+            <td>
+              <div class="behavior-group">
+                <span class="bsq g" title="Attentive"><i class="fas fa-eye"></i> {{ report.attentive }}</span>
+                <span class="bsq a" title="Sleepy"><i class="fas fa-bed"></i> {{ report.sleepy }}</span>
+                <span class="bsq r" title="Distracted"><i class="fas fa-exclamation-triangle"></i> {{ report.distracted }}</span>
+                <span class="bsq p" title="Talking" style="background:var(--purple-bg);color:var(--purple);"><i class="fas fa-comments"></i> {{ report.talking }}</span>
+                <span class="bsq s" title="Phone Usage" style="background:rgba(91,141,184,0.1);color:var(--steel);"><i class="fas fa-mobile-alt"></i> {{ report.phone_usage }}</span>
+                <span class="bsq k" title="Hand Raises" style="background:var(--green-bg);color:var(--green);"><i class="fas fa-hand-paper"></i> {{ report.hand_raises }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="perf-cell">
+                <span class="perf-val">{{ report.engagement }}%</span>
+                <div class="perf-track">
+                   <div class="perf-fill" data-width="{{ report.engagement }}"></div>                </div>
+              </div>
+            </td>
+            <td>
+              <div class="ops-cell">
+                {% if report.type == 'video' and report.heatmap %}
+                <button type="button" class="btn btn-amber" data-bs-toggle="modal" data-bs-target="#heatmapModal{{ report.original_id }}" style="padding:.45rem .9rem;font-size:.72rem;">
+                  <i class="fas fa-map-marked-alt"></i>Heatmap
+                </button>
+
+                <!-- Heatmap Modal -->
+                <div class="modal fade" id="heatmapModal{{ report.original_id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius:var(--r-xl);overflow:hidden;background:var(--white);">
+                      <div class="modal-header border-0 pb-0 pt-4 px-4">
+                        <h5 class="modal-title" style="font-family:var(--font-display);color:var(--text-dark);"><i class="fas fa-fire" style="color:#e8251a;margin-right:.45rem;"></i>Student Attention Heatmap</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body p-4 text-center">
+                        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:1rem;">Red = high engagement &nbsp;·&nbsp; Yellow = medium &nbsp;·&nbsp; Blue = low / distracted zones.</p>
+                        <img src="{{ report.heatmap }}" class="img-fluid" style="border-radius:var(--r);box-shadow:var(--shadow-md);" alt="Classroom Heatmap">
+                        <div style="margin-top:1.25rem;padding:1rem 1.25rem;background:var(--fog);border-radius:var(--r-sm);text-align:left;border:1px solid rgba(91,141,184,0.14);">
+                          <h6 style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:.5rem;">Colormap Legend</h6>
+                          <p style="font-size:.78rem;color:var(--text-mid);line-height:1.9;margin:0;">
+                            <span style="display:inline-block;width:12px;height:12px;background:#e8251a;border-radius:2px;vertical-align:middle;margin-right:.45rem;"></span><strong>Red</strong> — Sustained high attention (attentive students)<br>
+                            <span style="display:inline-block;width:12px;height:12px;background:#f5c518;border-radius:2px;vertical-align:middle;margin-right:.45rem;"></span><strong>Yellow</strong> — Moderate presence / neutral state<br>
+                            <span style="display:inline-block;width:12px;height:12px;background:#1976d2;border-radius:2px;vertical-align:middle;margin-right:.45rem;"></span><strong>Blue</strong> — Low engagement, sleepy or distracted zones
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+                <a href="{% url 'analytics_detail' report.id %}?type={{ report.type }}" class="btn btn-primary" style="padding:.45rem .9rem;font-size:.72rem;">
+                  <i class="fas fa-chart-pie"></i>Analytics
+                </a>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete('{% url 'report_delete' report.id %}')" style="padding:.45rem .9rem;font-size:.72rem;">
+                  <i class="fas fa-trash-alt"></i>Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr class="empty-row">
+            <td colspan="7">
+              <i class="fas fa-folder-open"></i>
+              <h6>No historical data available</h6>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<form id="hiddenDeleteForm" method="POST" style="display:none;">{% csrf_token %}</form>
+
+<script>
+function confirmDelete(url) {
+  if (confirm('Are you sure you want to delete this record?')) {
+    const form = document.getElementById('hiddenDeleteForm');
+    form.action = url;
+    form.submit();
+  }
+}
+document.querySelectorAll('.perf-fill').forEach(el => {
+    el.style.width = el.dataset.width + '%';
+});
+</script>
+{% endblock %}

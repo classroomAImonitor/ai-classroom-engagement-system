@@ -1,101 +1,373 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block title %}Upload Video - AI Classroom Engagement{% endblock %}
+  {% extends 'base.html' %}
+  {% load static %}
+  {% block title %}Upload Video - AI Classroom Engagement{% endblock %}
 
-{% block content %}
-<div class="row justify-content-center animate-in">
-    <div class="col-md-10 col-lg-8">
-        <div class="glass-card">
-            <div class="text-center mb-5">
-                <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📤 Upload Classroom Video</h1>
-                <p style="color: var(--text-muted);">Process and analyze classroom behavior using our advanced AI engine.</p>
-            </div>
-            
-            <form method="post" enctype="multipart/form-data" class="mt-4">
-                {% csrf_token %}
-                
-                <div class="mb-4">
-                    <label for="{{ form.title.id_for_label }}" class="form-label" style="font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; display: block;">Video Title</label>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                        <div class="invalid-feedback d-block text-danger mt-2 fw-bold">
-                            {{ form.title.errors }}
-                        </div>
-                    {% endif %}
-                </div>
+  {% block extra_css %}
+  <style>
+  :root {
+    --bg-base:      #D6E6F5;
+    --bg-mid:       #C2D8EE;
+    --fog:          #E0EDF7;
+    --white:        #FFFFFF;
+    --navy:         #1A3A5C;
+    --navy-mid:     #2B5282;
+    --navy-light:   #3A6FA8;
+    --steel:        #5B8DB8;
+    --steel-light:  #87B3D4;
+    --sky:          #A8CCE8;
+    --sky-light:    #C8E0F0;
+    --text-dark:    #1A3050;
+    --text-mid:     #3B6080;
+    --text-muted:   #7A9DB8;
+    --green:        #2E8B6A;
+    --green-bg:     rgba(46,139,106,0.1);
+    --red:          #C0392B;
+    --red-bg:       rgba(192,57,43,0.08);
+    --amber:        #B07A2A;
+    --amber-bg:     rgba(176,122,42,0.1);
+    --shadow-sm:    0 2px 12px rgba(26,58,92,0.07);
+    --shadow-md:    0 6px 24px rgba(26,58,92,0.11);
+    --shadow-lg:    0 16px 48px rgba(26,58,92,0.15);
+    --r:            14px;
+    --r-sm:         9px;
+    --r-lg:         20px;
+    --r-xl:         26px;
+    --font:         'DM Sans', sans-serif;
+    --font-display: 'Playfair Display', serif;
+    --font-mono:    'JetBrains Mono', monospace;
+  }
 
-                <div class="mb-5">
-                    <label for="{{ form.video_file.id_for_label }}" class="form-label" style="font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; display: block;">Select Video File</label>
-                    <div class="p-5 text-center glass-surface" style="border-radius: var(--radius-md); border: 2px dashed var(--glass-border); position: relative; transition: all 0.3s ease;">
-                        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📁</div>
-                        {{ form.video_file }}
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">Drag and drop or click to browse</p>
-                    </div>
-                    {% if form.video_file.errors %}
-                        <div class="invalid-feedback d-block text-danger mt-2 fw-bold">
-                            {{ form.video_file.errors }}
-                        </div>
-                    {% endif %}
-                    <div class="mt-3 text-center" style="font-size: 0.85rem; color: var(--text-muted);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        Max file size: 500MB. Supported formats: MP4, AVI, MOV.
-                    </div>
-                </div>
+  body {
+    background: var(--bg-base);
+    color: var(--text-dark);
+    font-family: var(--font);
+  }
 
-                <div class="d-flex justify-content-center gap-3 mt-5">
-                    <a href="{% url 'videos:video_list' %}" class="glass-btn glass-btn-outline" style="min-width: 150px; justify-content: center;">Cancel</a>
-                    <button type="submit" class="glass-btn" style="min-width: 220px; justify-content: center;">
-                        Upload & Analyze
-                    </button>
-                </div>
-            </form>
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-mid); }
+  ::-webkit-scrollbar-thumb { background: var(--steel-light); border-radius: 10px; }
 
-            <div class="mt-5 pt-4" style="border-top: 1px solid var(--glass-border);">
-                <h5 class="mb-4 text-center" style="font-weight: 800; color: var(--text-main);">🧠 AI Analysis Features</h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="p-3 glass-surface h-100" style="border-radius: var(--radius-md);">
-                            <div class="d-flex align-items-center gap-3">
-                                <span style="font-size: 1.5rem;">👨‍🎓</span>
-                                <div>
-                                    <strong style="display: block; font-size: 0.9rem;">Behavior Detection</strong>
-                                    <small style="color: var(--text-muted);">Analyzes focus and fatigue levels.</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 glass-surface h-100" style="border-radius: var(--radius-md);">
-                            <div class="d-flex align-items-center gap-3">
-                                <span style="font-size: 1.5rem;">⚡</span>
-                                <div>
-                                    <strong style="display: block; font-size: 0.9rem;">Fast Processing</strong>
-                                    <small style="color: var(--text-muted);">Optimized for quick turnaround.</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  .page { padding: 2rem 2.25rem 3rem; max-width: 1440px; margin: 0 auto; }
+
+  /* ══ PAGE HEADER ══ */
+  .page-eyebrow {
+    display: inline-flex; align-items: center; gap: .42rem;
+    background: rgba(91,141,184,0.1); border: 1px solid rgba(91,141,184,0.22);
+    border-radius: 20px; padding: .22rem .75rem; font-size: .62rem; font-weight: 700;
+    color: var(--steel); letter-spacing: .5px; text-transform: uppercase;
+    margin-bottom: .75rem; width: fit-content;
+  }
+  .page-title { font-family: var(--font-display); font-size: clamp(1.6rem,2.8vw,2.2rem); color: var(--text-dark); margin-bottom: .35rem; }
+  .page-sub { font-size: .82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.75rem; }
+
+  /* ══ UPLOAD LAYOUT ══ */
+  .upload-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  /* ══ MAIN FORM CARD ══ */
+  .form-card {
+    background: var(--white);
+    border: 1px solid rgba(91,141,184,0.14);
+    border-radius: var(--r-xl);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .form-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg,var(--navy),var(--steel),var(--sky));
+  }
+
+  /* ══ FORM ELEMENTS ══ */
+  .form-label {
+    display: block;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: .55rem;
+  }
+  .form-control-custom {
+    width: 100%;
+    background: var(--fog);
+    border: 1px solid rgba(91,141,184,0.22);
+    border-radius: var(--r-sm);
+    padding: .82rem 1.1rem;
+    color: var(--text-dark);
+    font-family: var(--font);
+    font-size: .88rem;
+    font-weight: 500;
+    transition: all .28s;
+    outline: none;
+  }
+  .form-control-custom:focus {
+    border-color: var(--navy);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(26,58,92,0.08);
+  }
+  .form-group { margin-bottom: 1.5rem; }
+  .form-error { color: var(--red); font-size: .72rem; font-weight: 600; margin-top: .35rem; }
+
+  /* ══ UPLOAD ZONE ══ */
+  .upload-zone {
+    background: var(--fog);
+    border: 2px dashed rgba(91,141,184,0.35);
+    border-radius: var(--r);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all .3s;
+    cursor: pointer;
+    position: relative;
+  }
+  .upload-zone:hover {
+    border-color: var(--navy);
+    background: var(--sky-light);
+  }
+  .upload-zone-icon {
+    font-size: 2.2rem;
+    color: var(--steel-light);
+    margin-bottom: .75rem;
+    display: block;
+    transition: color .3s, transform .3s;
+  }
+  .upload-zone:hover .upload-zone-icon {
+    color: var(--navy);
+    transform: translateY(-4px) scale(1.08);
+  }
+  .upload-zone-title { font-size: .88rem; font-weight: 700; color: var(--text-dark); margin-bottom: .3rem; }
+  .upload-zone-sub { font-size: .72rem; color: var(--text-muted); }
+  .upload-hint {
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+    margin-top: .9rem; font-size: .68rem; color: var(--text-muted); font-weight: 500;
+  }
+
+  /* ══ FORM FOOTER ══ */
+  .form-footer { display: flex; gap: .7rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--fog); }
+
+  /* ══ BUTTONS ══ */
+  .btn {
+    display: inline-flex; align-items: center; gap: .42rem; padding: .65rem 1.4rem;
+    border-radius: var(--r-sm); font-family: var(--font); font-size: .82rem; font-weight: 600;
+    text-decoration: none; cursor: pointer; border: none; transition: all .28s cubic-bezier(.2,.8,.2,1);
+    position: relative; overflow: hidden;
+  }
+  .btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.12); opacity: 0; transition: opacity .2s; }
+  .btn:hover::after { opacity: 1; }
+  .btn i { transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+  .btn:hover i { transform: scale(1.1); }
+  .btn-primary { background: var(--navy); color: #fff; box-shadow: 0 4px 14px rgba(26,58,92,0.2); }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(26,58,92,0.28); }
+  .btn-outline { background: var(--fog); color: var(--text-mid); border: 1px solid rgba(91,141,184,0.22); }
+  .btn-outline:hover { background: var(--bg-mid); transform: translateY(-2px); }
+
+  /* ══ SIDE PANEL ══ */
+  .side-panel { display: flex; flex-direction: column; gap: 1rem; }
+
+  /* Info card */
+  .info-card {
+    background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+    border-radius: var(--r-lg); padding: 1.5rem;
+    box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+  }
+  .info-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg,var(--navy),var(--steel));
+  }
+  .info-card-title {
+    font-size: .62rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: .4rem;
+  }
+
+  /* Feature boxes */
+  .feat-item {
+    display: flex; gap: .85rem; align-items: flex-start;
+    padding: .9rem; background: var(--fog);
+    border: 1px solid rgba(91,141,184,0.13); border-radius: var(--r-sm);
+    margin-bottom: .65rem; transition: all .25s;
+  }
+  .feat-item:last-child { margin-bottom: 0; }
+  .feat-item:hover { background: var(--sky-light); border-color: rgba(91,141,184,0.25); }
+  .feat-ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .82rem; flex-shrink: 0;
+    transition: transform .3s cubic-bezier(.2,.8,.2,1);
+  }
+  .feat-item:hover .feat-ico { transform: rotate(8deg) scale(1.1); }
+  .feat-ico.b { background: rgba(26,58,92,0.08); color: var(--navy); border: 1px solid rgba(26,58,92,0.1); }
+  .feat-ico.g { background: var(--green-bg); color: var(--green); border: 1px solid rgba(46,139,106,0.14); }
+  .feat-name { font-size: .8rem; font-weight: 700; color: var(--text-dark); margin-bottom: .18rem; }
+  .feat-desc { font-size: .7rem; color: var(--text-muted); line-height: 1.55; }
+
+  /* Steps card */
+  .steps-card {
+    background: linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
+    border-radius: var(--r-lg); padding: 1.5rem;
+    box-shadow: var(--shadow-md); position: relative; overflow: hidden;
+  }
+  .steps-card::before {
+    content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px;
+    background: radial-gradient(circle,rgba(168,204,232,0.1) 0%,transparent 70%); pointer-events: none;
+  }
+  .steps-card-title { font-size: .62rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(168,204,232,0.55); margin-bottom: 1rem; }
+  .step-row { display: flex; gap: .75rem; align-items: flex-start; margin-bottom: .85rem; }
+  .step-row:last-child { margin-bottom: 0; }
+  .step-num { font-family: var(--font-display); font-size: 1.35rem; color: transparent; -webkit-text-stroke: 1.5px rgba(168,204,232,0.35); line-height: 1; flex-shrink: 0; min-width: 28px; }
+  .step-name { font-size: .8rem; font-weight: 700; color: rgba(200,224,240,0.9); margin-bottom: .15rem; }
+  .step-desc { font-size: .68rem; color: rgba(168,204,232,0.55); line-height: 1.55; }
+
+  /* ══ ANIMATIONS ══ */
+  .fu { opacity: 0; transform: translateY(16px); animation: fadeUp .6s cubic-bezier(.19,1,.22,1) forwards; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .d1{animation-delay:.05s} .d2{animation-delay:.11s} .d3{animation-delay:.18s} .d4{animation-delay:.25s}
+
+  /* ══ RESPONSIVE ══ */
+  @media(max-width:1000px){ .upload-layout { grid-template-columns: 1fr; } }
+  @media(max-width:700px){ .page { padding: 1rem 1rem 2rem; } .form-card { padding: 1.5rem; } }
+  </style>
+  {% endblock %}
+
+  {% block content %}
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="fu d1">
+      <div class="page-eyebrow"><i class="fas fa-cloud-upload-alt"></i>Neural Repository</div>
+      <h1 class="page-title">Upload Session Footage</h1>
+      <p class="page-sub">Submit classroom footage for high-precision behavior analysis.</p>
     </div>
-</div>
 
-<style>
-    .form-control {
-        background: var(--glass-bg);
-        backdrop-filter: blur(5px);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-md);
-        padding: 0.8rem 1.2rem;
-        color: var(--text-main);
-        transition: all 0.3s ease;
-    }
-    .form-control:focus {
-        background: var(--glass-bg);
-        border-color: var(--primary);
-        box-shadow: 0 0 0 4px var(--primary-glow);
-        color: var(--text-main);
-    }
-</style>
-{% endblock %}
+    <div class="upload-layout">
+
+      <!-- MAIN FORM -->
+      <div class="form-card fu d2">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Title -->
+          <div class="form-group">
+            <label class="form-label">Session Reference Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+              <div class="form-error"><i class="fas fa-exclamation-circle"></i> {{ form.title.errors }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Camera Angle -->
+          <div class="form-group">
+            <label class="form-label">Camera Mounting / Orientation</label>
+            {{ form.camera_angle }}
+            <div class="upload-hint">
+              <i class="fas fa-compass"></i>
+              Select the physical mounting of your camera to ensure AI alignment.
+            </div>
+            {% if form.camera_angle.errors %}
+              <div class="form-error"><i class="fas fa-exclamation-circle"></i> {{ form.camera_angle.errors }}</div>
+            {% endif %}
+          </div>
+
+          <!-- File Upload -->
+          <div class="form-group">
+            <label class="form-label">Source Video File</label>
+            <div class="upload-zone">
+              <i class="fas fa-cloud-upload-alt upload-zone-icon"></i>
+              <div class="upload-zone-title">Drag &amp; drop or click to browse</div>
+              <div class="upload-zone-sub">{{ form.video_file }}</div>
+            </div>
+            <div class="upload-hint">
+              <i class="fas fa-info-circle"></i>
+              Max size: 500MB &nbsp;·&nbsp; Formats: MP4, AVI, MOV
+            </div>
+            {% if form.video_file.errors %}
+              <div class="form-error"><i class="fas fa-exclamation-circle"></i> {{ form.video_file.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-footer">
+            <a href="{% url 'videos:video_list' %}" class="btn btn-outline"><i class="fas fa-arrow-left"></i>Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-brain"></i>Initialize AI Analysis</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SIDE PANEL -->
+      <div class="side-panel">
+
+        <!-- Features -->
+        <div class="info-card fu d3">
+          <div class="info-card-title"><i class="fas fa-microchip"></i>AI Analysis Modules</div>
+
+          <div class="feat-item">
+            <div class="feat-ico b"><i class="fas fa-eye"></i></div>
+            <div>
+              <div class="feat-name">Engagement Matrix</div>
+              <div class="feat-desc">Detecting drift &amp; fatigue levels across the full session timeline.</div>
+            </div>
+          </div>
+
+          <div class="feat-item">
+            <div class="feat-ico g"><i class="fas fa-bolt"></i></div>
+            <div>
+              <div class="feat-name">Accelerated Compute</div>
+              <div class="feat-desc">Optimized local GPU processing — no external data transit.</div>
+            </div>
+          </div>
+
+          <div class="feat-item">
+            <div class="feat-ico b"><i class="fas fa-shield-halved"></i></div>
+            <div>
+              <div class="feat-name">AES-256 Encryption</div>
+              <div class="feat-desc">All student metadata encrypted at rest and in transit.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="steps-card fu d4">
+          <div class="steps-card-title"><i class="fas fa-list-ol"></i> &nbsp;Processing Pipeline</div>
+
+          <div class="step-row">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-name">Feed Ingestion</div>
+              <div class="step-desc">Video is ingested locally and queued for neural frame parsing.</div>
+            </div>
+          </div>
+
+          <div class="step-row">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-name">Neural Mapping</div>
+              <div class="step-desc">MediaPipe &amp; TensorFlow map facial geometry and posture landmarks per frame.</div>
+            </div>
+          </div>
+
+          <div class="step-row">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-name">Report Synthesis</div>
+              <div class="step-desc">Automated generation of engagement summaries and visual dashboards.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const titleInput = document.querySelector('input[name="title"]');
+    const fileInput  = document.querySelector('input[type="file"]');
+    if (titleInput) titleInput.classList.add('form-control-custom');
+    if (fileInput)  fileInput.classList.add('form-control-custom');
+  });
+  </script>
+  {% endblock %}

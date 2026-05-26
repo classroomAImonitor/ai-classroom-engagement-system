@@ -1,378 +1,1072 @@
-{% extends "base.html" %}
 {% load static %}
-
-{% block title %}Home - AI Classroom Engagement{% endblock %}
-
-{% block extra_css %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Classroom Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-    /* ---------- Glass Morphism Styles ---------- */
-    :root {
-        --glass-bg: rgba(255, 255, 255, 0.2);
-        --glass-border: rgba(255, 255, 255, 0.3);
-        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-        --primary-color: #6c5ce7;
-        --primary-dark: #5649c0;
-        --text-dark: #2d3436;
-        --text-light: #f5f6fa;
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+:root {
+  /* Blue Palette */
+  --sky-100: #e0f0ff;
+  --sky-200: #bae0ff;
+  --sky-300: #7ec8f7;
+  --light-blue: #5ba4cf;
+  --dusty-blue: #4a7fa5;
+  --steel-blue: #3a6b91;
+  --navy: #1a3558;
+  --navy-deep: #0f2240;
+  --navy-darkest: #081529;
+  --blue-grey: #6b82a0;
+  --blue-grey-light: #a8bdd0;
+  --blue-grey-pale: #dce8f2;
 
-    /* Glass card base */
-    .glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(10px);
-        border-radius: 1.5rem;
-        border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-shadow);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+  /* UI Colors */
+  --white: #ffffff;
+  --off-white: #f4f8fc;
+  --cream-blue: #eef4fa;
+  --border: rgba(26,53,88,0.12);
+  --border-light: rgba(91,164,207,0.2);
 
-    .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
-    }
+  /* Status colors */
+  --green: #22a06b;
+  --amber: #d4860a;
+  --red: #d04040;
+  --teal: #1a8c8c;
+}
 
-    /* Hero section */
-    .hero {
-        background: rgba(108, 92, 231, 0.15);
-        backdrop-filter: blur(12px);
-        border-radius: 2rem;
-        padding: 4rem 2rem;
-        text-align: center;
-        margin-bottom: 3rem;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        animation: fadeInUp 0.8s ease-out;
-    }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--white);
+  color: var(--navy);
+  overflow-x: hidden;
+}
 
-    .hero h1 {
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        margin-bottom: 1rem;
-    }
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 2.5rem;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: 0 1px 24px rgba(26,53,88,0.07);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1rem; letter-spacing: -0.02em;
+  text-decoration: none; color: var(--navy);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.logo-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--dusty-blue), var(--navy));
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.logo-mark::after {
+  content: '';
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--sky-300);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.5} }
 
-    .hero .lead {
-        font-size: 1.2rem;
-        color: var(--text-dark);
-        opacity: 0.9;
-    }
+.nav-links { display: flex; gap: 2.5rem; list-style: none; align-items: center; }
+.nav-links a {
+  text-decoration: none; color: var(--blue-grey); font-size: 0.875rem;
+  font-weight: 600; transition: color 0.2s; letter-spacing: 0.01em;
+}
+.nav-links a:hover { color: var(--navy); }
+.nav-auth { display: flex; gap: 0.75rem; align-items: center; }
+.btn-login {
+  padding: 0.5rem 1.2rem; border-radius: 8px;
+  border: 1.5px solid var(--border-light); color: var(--dusty-blue);
+  font-size: 0.85rem; font-weight: 700; text-decoration: none;
+  transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.btn-login:hover { border-color: var(--dusty-blue); color: var(--navy); background: var(--sky-100); }
+.btn-register {
+  padding: 0.5rem 1.2rem; border-radius: 8px;
+  background: linear-gradient(135deg, var(--dusty-blue), var(--navy));
+  color: #fff;
+  font-size: 0.85rem; font-weight: 700; text-decoration: none;
+  transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 2px 12px rgba(26,53,88,0.18);
+}
+.btn-register:hover { background: linear-gradient(135deg, var(--steel-blue), var(--navy-deep)); transform: translateY(-1px); }
 
-    .btn-glass {
-        background: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(4px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        color: var(--primary-dark);
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: grid; grid-template-columns: 1fr 1fr;
+  padding-top: 70px;
+  background: var(--off-white);
+  position: relative; overflow: hidden;
+}
+.hero-dots {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(91,164,207,0.15) 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  z-index: 0;
+}
+.hero-glow {
+  position: absolute; top: -80px; right: 200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(91,164,207,0.15) 0%, transparent 70%);
+  z-index: 0;
+}
+.hero-glow2 {
+  position: absolute; bottom: -120px; left: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(26,53,88,0.07) 0%, transparent 70%);
+  z-index: 0;
+}
+.hero-left {
+  padding: 5rem 3.5rem 4rem;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; z-index: 2;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(91,164,207,0.12); color: var(--dusty-blue);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 0.35rem 1rem;
+  border-radius: 100px; margin-bottom: 2rem; width: fit-content;
+  border: 1px solid rgba(91,164,207,0.3);
+  font-family: 'JetBrains Mono', monospace;
+}
+.badge-dot { width:6px;height:6px;border-radius:50%;background:var(--light-blue);animation:blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-    .btn-glass:hover {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-        transform: scale(1.05);
-    }
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.6rem, 4.5vw, 4rem);
+  font-weight: 700; line-height: 1.08;
+  letter-spacing: -0.02em; margin-bottom: 1.5rem; color: var(--navy);
+}
+.hero-title em { font-style: italic; color: var(--dusty-blue); }
+.hero-desc {
+  font-size: 1rem; line-height: 1.85;
+  color: var(--blue-grey); max-width: 44ch; margin-bottom: 2.5rem;
+  font-weight: 400;
+}
+.hero-actions { display: flex; gap: 1rem; align-items: center; margin-bottom: 3.5rem; flex-wrap: wrap; }
+.btn-primary {
+  padding: 0.85rem 2rem; border-radius: 10px;
+  background: linear-gradient(135deg, var(--dusty-blue), var(--navy));
+  color: #fff;
+  font-size: 0.95rem; font-weight: 700; text-decoration: none;
+  transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(26,53,88,0.22);
+}
+.btn-primary:hover { background: linear-gradient(135deg, var(--steel-blue), var(--navy-deep)); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(26,53,88,0.28); }
+.btn-ghost {
+  padding: 0.85rem 2rem; border-radius: 10px;
+  border: 1.5px solid var(--border-light); color: var(--dusty-blue);
+  font-size: 0.95rem; font-weight: 600; text-decoration: none;
+  transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;
+  background: rgba(255,255,255,0.7);
+}
+.btn-ghost:hover { border-color: var(--dusty-blue); color: var(--navy); background: var(--sky-100); }
 
-    .btn-primary-glass {
-        background: var(--primary-color);
-        border: none;
-        color: white;
-    }
+.hero-stats { display: flex; gap: 3rem; }
+.stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.8rem; font-weight: 500; color: var(--navy); line-height: 1;
+}
+.stat-lbl { font-size: 0.72rem; color: var(--blue-grey); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
 
-    .btn-primary-glass:hover {
-        background: var(--primary-dark);
-        transform: scale(1.05);
-    }
+/* ─── HERO CAMERA ─── */
+.hero-right {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  padding: 4rem 3rem 4rem 1rem;
+}
+.camera-frame {
+  width: 100%; max-width: 460px;
+  background: var(--navy-darkest); border-radius: 20px; overflow: hidden;
+  border: 1px solid rgba(91,164,207,0.15);
+  box-shadow: 0 40px 100px rgba(26,53,88,0.3), 0 0 0 1px rgba(91,164,207,0.08);
+}
+.cam-header {
+  background: var(--navy-deep); padding: 0.8rem 1.2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(91,164,207,0.1);
+}
+.cam-dots { display: flex; gap: 6px; }
+.cam-dots span { width:10px;height:10px;border-radius:50%; }
+.cam-dots span:nth-child(1) { background:#e84545; }
+.cam-dots span:nth-child(2) { background:#f0b94a; }
+.cam-dots span:nth-child(3) { background:#4fc64f; }
+.cam-title { font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--blue-grey-light); letter-spacing: 0.04em; }
+.cam-rec { display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#e84545;font-weight:500; }
+.rec-dot { width:6px;height:6px;border-radius:50%;background:#e84545;animation:blink 1s infinite; }
+.cam-body { position:relative;height:280px;background:#070f1e;overflow:hidden; }
+.scan-line {
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--sky-300),transparent);
+  animation:scan 3s ease-in-out infinite;z-index:5;
+}
+@keyframes scan { 0%{top:0;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:100%;opacity:0} }
+.cam-grid {
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(91,164,207,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(91,164,207,0.05) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+.students-grid {
+  position:absolute;inset:16px;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:8px;z-index:3;
+}
+.student-cell {
+  border-radius:10px;overflow:hidden;position:relative;
+  background:#0e1e35;border:1px solid rgba(91,164,207,0.12);
+}
+.student-face { width:100%;height:70px;display:flex;align-items:center;justify-content:center;font-size:1.6rem; }
+.student-status {
+  position:absolute;bottom:0;left:0;right:0;
+  padding:3px 5px;font-size:0.55rem;font-weight:700;
+  font-family:'JetBrains Mono',monospace;text-align:center;
+  letter-spacing:0.05em;text-transform:uppercase;
+}
+.status-attentive { background:rgba(22,163,74,0.85);color:#d0ffe8; }
+.status-sleepy { background:rgba(74,127,165,0.9);color:#ddeeff; }
+.status-distracted { background:rgba(208,64,64,0.85);color:#ffd6d6; }
+.status-neutral { background:rgba(107,130,160,0.85);color:#d0e4f8; }
+.status-talking { background:rgba(212,134,10,0.85);color:#fff3d6; }
+.status-phone { background:rgba(139,92,246,0.85);color:#ede9fe; }
+.status-handraise { background:rgba(6,182,212,0.85);color:#cffafe; }
+.detect-box { position:absolute;inset:4px;border-radius:8px;border:1px solid;animation:detect-pulse 2s ease-in-out infinite; }
+.detect-attentive { border-color:rgba(91,164,207,0.7); }
+.detect-sleepy { border-color:rgba(74,127,165,0.7);animation-delay:0.5s; }
+.detect-distracted { border-color:rgba(208,64,64,0.6);animation-delay:1s; }
+.detect-neutral { border-color:rgba(107,130,160,0.6);animation-delay:1.5s; }
+.detect-talking { border-color:rgba(212,134,10,0.6);animation-delay:0.3s; }
+.detect-phone { border-color:rgba(139,92,246,0.6);animation-delay:0.8s; }
+.detect-handraise { border-color:rgba(6,182,212,0.6);animation-delay:1.2s; }
+@keyframes detect-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+.cam-overlay-info { position:absolute;top:8px;left:8px;z-index:6; }
+.cam-overlay-info span { display:block;font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--sky-300);line-height:1.8; opacity: 0.85; }
+.cam-footer {
+  background:var(--navy-deep);padding:0.8rem 1.2rem;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid rgba(91,164,207,0.1);
+}
+.cam-footer-stat { text-align:center; }
+.cam-footer-num { font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:500; }
+.cam-footer-lbl { font-size:0.58rem;margin-top:2px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase; color:var(--blue-grey-light); }
+.attentive-num { color:#4ade80; }
+.sleepy-num { color:var(--sky-300); }
+.distract-num { color:#f87171; }
+.neutral-num { color:var(--blue-grey-light); }
 
-    /* Engagement state cards */
-    .state-card {
-        text-align: center;
-        padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(8px);
-        border-radius: 1.2rem;
-        transition: all 0.3s;
-    }
+/* ─── DIVIDER ─── */
+.divider { width:100%;height:1px;background:var(--border-light); }
 
-    .state-card i {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
+/* ─── INTRO ─── */
+.intro-section {
+  background: var(--white); padding: 6rem 3.5rem;
+}
+.intro-inner { max-width: 860px; margin: 0 auto; }
+.intro-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--dusty-blue); text-transform: uppercase; letter-spacing: 0.14em;
+  margin-bottom: 1.5rem; display: block; font-weight: 500;
+}
+.intro-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 700; line-height: 1.2; margin-bottom: 1.5rem;
+  letter-spacing: -0.02em; color: var(--navy);
+}
+.intro-inner p {
+  font-size: 1.05rem; color: var(--blue-grey); line-height: 1.85;
+  max-width: 70ch; font-weight: 400;
+}
+.intro-inner strong { color: var(--navy); font-weight: 700; }
 
-    .state-card h5 {
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
+/* ─── OBJECTIVES ─── */
+.objectives { background: var(--cream-blue); padding: 6rem 3.5rem; }
+.section-header { margin-bottom: 3rem; }
+.section-tag {
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;
+  color:var(--dusty-blue);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:0.75rem;display:block;font-weight:500;
+}
+.section-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;
+  line-height:1.2;letter-spacing:-0.02em;color:var(--navy);
+}
+.section-desc { color:var(--blue-grey);font-size:1rem;line-height:1.75; margin-top: 0.75rem; font-weight: 400; }
+.objectives-grid { display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border-light); border:1px solid var(--border-light); border-radius:16px; overflow:hidden; }
+.obj-card {
+  padding:2.5rem;
+  background: var(--white);
+  transition: background 0.2s;
+}
+.obj-card:hover { background: var(--sky-100); }
+.obj-number { font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--blue-grey-light);margin-bottom:1rem;letter-spacing:0.1em; }
+.obj-icon { font-size:1.5rem;margin-bottom:0.75rem;display:block; }
+.obj-title { font-weight:700;font-size:1.05rem;margin-bottom:0.5rem;color:var(--navy); font-family:'Plus Jakarta Sans',sans-serif; }
+.obj-text { font-size:0.875rem;color:var(--blue-grey);line-height:1.75; }
 
-    .state-card p {
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }
+/* ─── MODULES ─── */
+.modules-section { background: var(--navy-darkest); padding: 6rem 3.5rem; }
+.modules-section .section-tag { color: var(--sky-300); }
+.modules-section .section-title { color: #eef4fa; }
+.modules-section .section-desc { color: rgba(168,189,208,0.7); }
+.modules-list {
+  display:flex;flex-direction:column;margin-top:3rem;
+  border:1px solid rgba(91,164,207,0.12);border-radius:16px;overflow:hidden;
+}
+.module-row {
+  display:grid;grid-template-columns:52px 230px 1fr;
+  align-items:stretch;border-bottom:1px solid rgba(91,164,207,0.08);
+  transition:background 0.2s;
+}
+.module-row:last-child { border-bottom:none; }
+.module-row:hover { background:rgba(91,164,207,0.06); }
+.mod-num {
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;
+  color:rgba(168,189,208,0.3);border-right:1px solid rgba(91,164,207,0.08);
+}
+.mod-name {
+  padding:1.4rem 1.5rem;display:flex;align-items:center;gap:1rem;
+  border-right:1px solid rgba(91,164,207,0.08);
+}
+.mod-icon { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0; }
+.mod-label { font-weight:700;font-size:0.9rem;line-height:1.3;color:#dce8f2; }
+.mod-tech { font-size:0.66rem;color:rgba(168,189,208,0.4);margin-top:3px;font-family:'JetBrains Mono',monospace; }
+.mod-desc { padding:1.4rem 1.5rem;font-size:0.875rem;color:rgba(168,189,208,0.6);line-height:1.75;display:flex;align-items:center; }
+.bg-teal { background:rgba(26,140,140,0.22); }
+.bg-blue { background:rgba(74,127,165,0.25); }
+.bg-lblue { background:rgba(91,164,207,0.18); }
+.bg-indigo { background:rgba(58,107,145,0.3); }
+.bg-slate { background:rgba(107,130,160,0.22); }
+.bg-sky { background:rgba(126,200,247,0.15); }
 
-    /* Feature icons */
-    .feature-icon {
-        font-size: 2rem;
-        background: rgba(255, 255, 255, 0.3);
-        width: 70px;
-        height: 70px;
-        line-height: 70px;
-        text-align: center;
-        border-radius: 50%;
-        margin-bottom: 1rem;
-        backdrop-filter: blur(4px);
-        transition: transform 0.3s;
-    }
+/* ─── PIPELINE ─── */
+.pipeline-section { background: var(--navy-deep); padding: 6rem 3.5rem; }
+.pipeline-section .section-tag { color: var(--sky-300); }
+.pipeline-section .section-title { color: #eef4fa; }
+.pipeline-flow {
+  display:flex;align-items:center;margin-top:3.5rem;
+  overflow-x:auto;padding-bottom:1rem;gap:0;
+}
+.pipe-step {
+  background:rgba(91,164,207,0.07);
+  border:1px solid rgba(91,164,207,0.18);
+  border-radius:14px;padding:1.5rem 1.25rem;
+  text-align:center;min-width:145px;flex-shrink:0;
+  transition: background 0.2s, transform 0.2s;
+}
+.pipe-step:hover { background: rgba(91,164,207,0.15); transform: translateY(-4px); border-color: rgba(91,164,207,0.35); }
+.pipe-step-icon { font-size:1.8rem;margin-bottom:0.6rem; }
+.pipe-step-label { font-size:0.82rem;font-weight:700;color:#dce8f2;margin-bottom:0.3rem;letter-spacing:0.01em; }
+.pipe-step-sub { font-size:0.64rem;color:rgba(168,189,208,0.45);font-family:'JetBrains Mono',monospace; }
+.pipe-arrow { font-size:1.2rem;color:rgba(91,164,207,0.3);padding:0 0.5rem;flex-shrink:0; }
 
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1);
-    }
+/* ─── BEHAVIOR ─── */
+.behavior-section { background: var(--white); padding: 6rem 3.5rem; }
+.behavior-cards { display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-top:3rem; }
+.beh-card {
+  border-radius:16px;padding:2rem 1.5rem;
+  position:relative;overflow:hidden;
+  border: 1px solid;
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.beh-card:hover { transform:translateY(-5px);box-shadow:0 20px 40px rgba(26,53,88,0.1); }
+.beh-attentive { background:rgba(91,164,207,0.06); border-color:rgba(91,164,207,0.25); }
+.beh-sleepy { background:rgba(26,53,88,0.05); border-color:rgba(26,53,88,0.15); }
+.beh-distracted { background:#fff1f2; border-color:#fecdd3; }
+.beh-neutral { background:var(--cream-blue); border-color:var(--blue-grey-pale); }
+.beh-emoji { font-size:2rem;margin-bottom:1rem;display:block; }
+.beh-name { font-weight:800;font-size:1rem;margin-bottom:0.5rem; letter-spacing:-0.01em; font-family:'Plus Jakarta Sans',sans-serif; }
+.beh-attentive .beh-name { color:var(--dusty-blue); }
+.beh-sleepy .beh-name { color:var(--navy); }
+.beh-distracted .beh-name { color:#b91c1c; }
+.beh-neutral .beh-name { color:var(--blue-grey); }
+.beh-desc { font-size:0.82rem;color:var(--blue-grey);line-height:1.7;margin-bottom:1rem; }
+.beh-signals { list-style:none; }
+.beh-signals li {
+  font-size:0.78rem;color:var(--blue-grey);
+  padding:0.2rem 0;display:flex;align-items:center;gap:8px;
+}
+.beh-signals li::before { content:'';width:4px;height:4px;border-radius:50%;flex-shrink:0; }
+.beh-attentive .beh-signals li::before { background:var(--light-blue); }
+.beh-sleepy .beh-signals li::before { background:var(--navy); }
+.beh-distracted .beh-signals li::before { background:#dc2626; }
+.beh-neutral .beh-signals li::before { background:var(--blue-grey); }
+.beh-talking { background:rgba(212,134,10,0.06); border-color:rgba(212,134,10,0.25); }
+.beh-talking .beh-name { color:#92400e; }
+.beh-talking .beh-signals li::before { background:#d4860a; }
+.beh-phone { background:rgba(139,92,246,0.06); border-color:rgba(139,92,246,0.25); }
+.beh-phone .beh-name { color:#5b21b6; }
+.beh-phone .beh-signals li::before { background:#8b5cf6; }
+.beh-handraise { background:rgba(6,182,212,0.06); border-color:rgba(6,182,212,0.25); }
+.beh-handraise .beh-name { color:#0e7490; }
+.beh-handraise .beh-signals li::before { background:#06b6d4; }
 
-    /* Animation */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
+/* ─── BENEFITS ─── */
+.benefits-section { background: var(--off-white); padding: 6rem 3.5rem; }
+.benefits-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:3rem; }
+.ben-card {
+  background:var(--white);border:1px solid var(--border-light);
+  border-radius:16px;padding:2rem;
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.ben-card:hover { transform:translateY(-4px);box-shadow:0 12px 32px rgba(26,53,88,0.1); border-color:var(--light-blue); }
+.ben-icon-wrap {
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;margin-bottom:1.25rem;
+  background: linear-gradient(135deg, var(--sky-100), var(--blue-grey-pale));
+}
+.ben-title { font-weight:700;font-size:1rem;margin-bottom:0.5rem;color:var(--navy); }
+.ben-desc { font-size:0.85rem;color:var(--blue-grey);line-height:1.75; }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* ─── FAQ ─── */
+.faq-section { background: var(--navy); padding: 6rem 3.5rem; }
+.faq-section .section-tag { color: var(--sky-300); }
+.faq-section .section-title { color: #eef4fa; }
+.faq-section .section-desc { color: rgba(168,189,208,0.6); }
+.faq-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:rgba(91,164,207,0.1);
+  border:1px solid rgba(91,164,207,0.15);
+  border-radius:16px;overflow:hidden;
+  margin-top:3rem;
+}
+.faq-item {
+  padding:1.75rem 2rem;
+  background: rgba(15,34,64,0.5);
+  border-bottom:1px solid rgba(91,164,207,0.08);
+  border-right:1px solid rgba(91,164,207,0.08);
+  transition:background 0.15s;
+}
+.faq-item:hover { background:rgba(91,164,207,0.08); }
+.faq-item:nth-child(2n) { border-right:none; }
+.faq-item:nth-last-child(-n+2) { border-bottom:none; }
+.faq-q {
+  font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;
+  display:flex;align-items:flex-start;gap:10px;color:#dce8f2;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.faq-num { font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:var(--sky-300);margin-top:2px;flex-shrink:0; }
+.faq-a { font-size:0.83rem;color:rgba(168,189,208,0.65);line-height:1.75;padding-left:1.75rem; }
 
-    .animate {
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
+/* ─── CTA ─── */
+.cta-section {
+  background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-darkest) 100%);
+  padding: 6rem 3.5rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-glow {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 700px; height: 350px;
+  background: radial-gradient(ellipse, rgba(91,164,207,0.15) 0%, transparent 70%);
+}
+.cta-section .section-tag { color: var(--sky-300); position: relative; z-index: 1; }
+.cta-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 700; color: #eef4fa;
+  margin-bottom: 1rem; letter-spacing: -0.02em;
+  position: relative; z-index: 1;
+}
+.cta-section p {
+  color: rgba(168,189,208,0.65); font-size: 1rem;
+  margin-bottom: 2.5rem; max-width: 44ch;
+  margin-left: auto; margin-right: auto; line-height: 1.85;
+  position: relative; z-index: 1;
+}
+.cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+.btn-cta-login {
+  padding: 0.9rem 2rem; border-radius: 10px;
+  border: 1.5px solid rgba(91,164,207,0.3); color: #dce8f2;
+  font-size: 0.95rem; font-weight: 700; text-decoration: none;
+  transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.btn-cta-login:hover { background: rgba(91,164,207,0.1); border-color: rgba(91,164,207,0.5); }
+.btn-cta-register {
+  padding: 0.9rem 2rem; border-radius: 10px;
+  background: linear-gradient(135deg, var(--light-blue), var(--dusty-blue));
+  color: #fff;
+  font-size: 0.95rem; font-weight: 700; text-decoration: none;
+  transition: all 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 4px 20px rgba(91,164,207,0.25);
+}
+.btn-cta-register:hover { background: linear-gradient(135deg, var(--dusty-blue), var(--steel-blue)); transform: translateY(-2px); }
 
-    /* Demo placeholder */
-    .demo-placeholder {
-        background: rgba(0, 0, 0, 0.05);
-        backdrop-filter: blur(8px);
-        border-radius: 1.5rem;
-        padding: 2rem;
-        text-align: center;
-        border: 1px dashed rgba(0, 0, 0, 0.2);
-    }
+/* ─── FOOTER ─── */
+.custom-dark-footer {
+  background: var(--navy-darkest);
+  padding: 3.5rem 3.5rem 1.5rem;
+  border-top: 1px solid rgba(91,164,207,0.1);
+}
+.custom-dark-footer .container {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 2rem;
+}
+.footer-social-icons {
+  display: flex; gap: 1rem; align-items: center;
+}
+.footer-social-icons a {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(91,164,207,0.08);
+  border: 1px solid rgba(91,164,207,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(168,189,208,0.6); font-size: 0.9rem;
+  text-decoration: none; transition: all 0.2s;
+}
+.footer-social-icons a:hover {
+  background: var(--dusty-blue); color: #fff; border-color: var(--dusty-blue);
+  transform: translateY(-2px);
+}
+.footer-nav-links {
+  display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+}
+.footer-nav-links a {
+  color: rgba(168,189,208,0.45); text-decoration: none;
+  font-size: 0.85rem; font-weight: 600; transition: color 0.2s;
+}
+.footer-nav-links a:hover { color: #dce8f2; }
+.footer-bottom-copy {
+  font-size: 0.78rem; color: rgba(168,189,208,0.25);
+  text-align: center; border-top: 1px solid rgba(91,164,207,0.08);
+  padding-top: 1.5rem; margin-top: 0.5rem; width: 100%;
+  max-width: 1100px; margin-left: auto; margin-right: auto;
+}
+.footer-bottom-copy span { color: rgba(168,189,208,0.55); font-weight: 700; }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .hero h1 {
-            font-size: 2rem;
-        }
+/* ─── ANIMATIONS ─── */
+@keyframes fade-up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation: fade-up 0.7s ease forwards; }
+.d1 { animation-delay:0.1s;opacity:0; }
+.d2 { animation-delay:0.3s;opacity:0; }
+.d3 { animation-delay:0.5s;opacity:0; }
 
-        .hero {
-            padding: 2rem 1rem;
-        }
-    }
+/* ─── RESPONSIVE ─── */
+@media(max-width:1024px){
+  .behavior-cards { grid-template-columns:1fr 1fr; }
+  .benefits-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:900px){
+  .hero { grid-template-columns:1fr;min-height:auto; }
+  .hero-right { padding:2rem 2rem 4rem; }
+  .hero-left { padding:5rem 2rem 2rem; }
+  nav { padding:1rem 1.5rem; }
+  .nav-links { display:none; }
+  .objectives-grid { grid-template-columns:1fr; }
+  .faq-grid { grid-template-columns:1fr; }
+  .faq-item:nth-child(2n) { border-right:none; }
+  .faq-item:nth-last-child(-n+2) { border-bottom:1px solid rgba(91,164,207,0.08); }
+  .faq-item:last-child { border-bottom:none; }
+  .module-row { grid-template-columns:40px 180px 1fr; }
+  section { padding:4rem 1.75rem; }
+}
+@media(max-width:600px){
+  .behavior-cards { grid-template-columns:1fr; }
+  .benefits-grid { grid-template-columns:1fr; }
+  .hero-stats { flex-direction:column;gap:1.5rem; }
+  .module-row { grid-template-columns:1fr; }
+  .mod-num { display:none; }
+  .mod-desc { border-top:1px solid rgba(91,164,207,0.08); }
+  .custom-dark-footer { padding: 3rem 1.5rem 1.5rem; }
+}
 </style>
-{% endblock %}
+</head>
+<body>
 
-{% block content %}
-<div class="container py-4">
-    <!-- Hero Section -->
-    <div class="hero">
-        <h1>🎓 AI Classroom Engagement</h1>
-        <p class="lead">Real‑time computer vision that detects student attention levels — helping educators create more
-            interactive and effective lessons.</p>
-        <div class="mt-4">
-            {% if user.is_authenticated %}
-            <a href="{% url 'videos:video_upload' %}" class="btn btn-primary-glass btn-lg mx-2 px-4">
-                <i class="fas fa-video me-2"></i> Upload Footage
-            </a>
-            <a href="{% url 'analytics' %}" class="btn btn-glass btn-lg mx-2 px-4">
-                <i class="fas fa-chart-line me-2"></i> View Analytics
-            </a>
-            {% else %}
-            <a href="{% url 'login' %}" class="btn btn-primary-glass btn-lg mx-2 px-4">
-                <i class="fas fa-sign-in-alt me-2"></i> Login
-            </a>
-            <a href="{% url 'register' %}" class="btn btn-glass btn-lg mx-2 px-4">
-                <i class="fas fa-user-plus me-2"></i> Register
-            </a>
-            {% endif %}
-        </div>
-    </div>
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="logo-mark"></div>
+    ClassMonitor AI
+  </a>
+  <ul class="nav-links">
+    <li><a href="#objectives">Objectives</a></li>
+    <li><a href="#modules">Modules</a></li>
+    <li><a href="#behavior">Behaviour</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-auth">
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="btn-register">Dashboard</a>
+      <a href="{% url 'logout' %}" class="btn-login">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn-login">Login</a>
+      <a href="{% url 'register' %}" class="btn-register">Sign Up</a>
+    {% endif %}
+  </div>
+</nav>
 
-    <!-- Engagement States (the 4 categories) -->
-    <div class="mb-5">
-        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">What We Detect</h2>
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="state-card">
-                    <i class="fas fa-smile-wink" style="color: #2ecc71;"></i>
-                    <h5>Attentive</h5>
-                    <p>Students actively participating, making eye contact, and showing interest.</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="state-card">
-                    <i class="fas fa-bed" style="color: #f39c12;"></i>
-                    <h5>Sleepy</h5>
-                    <p>Signs of fatigue: drooping eyelids, yawning, or resting heads.</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="state-card">
-                    <i class="fas fa-mobile-alt" style="color: #e74c3c;"></i>
-                    <h5>Distracted</h5>
-                    <p>Looking away, using phones, or not following the lesson.</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="state-card">
-                    <i class="fas fa-meh" style="color: #95a5a6;"></i>
-                    <h5>Neutral</h5>
-                    <p>Standard resting state – neither highly engaged nor clearly disengaged.</p>
-                </div>
-            </div>
-        </div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-left fade-up d1">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Live Monitoring Active
     </div>
+    <h1 class="hero-title">
+      AI-Driven<br><em>Classroom</em><br>Engagement Monitor
+    </h1>
+    <p class="hero-desc">
+      Real-time student behaviour analysis using Computer Vision, MediaPipe face detection, and Django. Transforming passive classrooms into data-driven learning environments.
+    </p>
+    <div class="hero-actions">
+     {% if user.is_authenticated %}
+       <a href="{% url 'dashboard' %}" class="btn-primary">Go to Dashboard →</a>
+     {% else %}
+       <a href="{% url 'register' %}" class="btn-primary">Get Started →</a>
+       <a href="{% url 'login' %}" class="btn-ghost">Login</a>
+     {% endif %}
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">7</div>
+        <div class="stat-lbl">Behaviour Categories</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">30fps</div>
+        <div class="stat-lbl">Real-time Processing</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">6+</div>
+        <div class="stat-lbl">System Modules</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right fade-up d2">
+    <div class="camera-frame">
+      <div class="cam-header">
+        <div class="cam-dots"><span></span><span></span><span></span></div>
+        <span class="cam-title">classroom_feed_01.mp4</span>
+        <div class="cam-rec"><span class="rec-dot"></span> LIVE</div>
+      </div>
+      <div class="cam-body">
+        <div class="cam-grid"></div>
+        <div class="scan-line"></div>
+        <div class="cam-overlay-info">
+          <span>FPS: 30 | RES: 1280×720</span>
+          <span>FACES: 6 | MODEL: MediaPipe</span>
+          <span>OPENCV: 4.8 | DJANGO: 5.0</span>
+        </div>
+        <div class="students-grid">
+          <div class="student-cell">
+            <div class="student-face">🧑‍🎓</div>
+            <div class="detect-box detect-attentive"></div>
+            <div class="student-status status-attentive">Attentive</div>
+          </div>
+          <div class="student-cell">
+            <div class="student-face">😴</div>
+            <div class="detect-box detect-sleepy"></div>
+            <div class="student-status status-sleepy">Sleepy</div>
+          </div>
+          <div class="student-cell">
+            <div class="student-face">🧑‍💻</div>
+            <div class="detect-box detect-attentive"></div>
+            <div class="student-status status-attentive">Attentive</div>
+          </div>
+          <div class="student-cell">
+            <div class="student-face">😶</div>
+            <div class="detect-box detect-neutral"></div>
+            <div class="student-status status-neutral">Neutral</div>
+          </div>
+          <div class="student-cell">
+            <div class="student-face">👀</div>
+            <div class="detect-box detect-distracted"></div>
+            <div class="student-status status-distracted">Distracted</div>
+          </div>
+          <div class="student-cell">
+            <div class="student-face">🧑‍🎓</div>
+            <div class="detect-box detect-attentive"></div>
+            <div class="student-status status-attentive">Attentive</div>
+          </div>
+        </div>
+      </div>
+      <div class="cam-footer">
+        <div class="cam-footer-stat"><div class="cam-footer-num attentive-num">3</div><div class="cam-footer-lbl">Attentive</div></div>
+        <div class="cam-footer-stat"><div class="cam-footer-num sleepy-num">1</div><div class="cam-footer-lbl">Sleepy</div></div>
+        <div class="cam-footer-stat"><div class="cam-footer-num distract-num">1</div><div class="cam-footer-lbl">Distracted</div></div>
+        <div class="cam-footer-stat"><div class="cam-footer-num" style="color:#f0b94a;">1</div><div class="cam-footer-lbl">Talking</div></div>
+        <div class="cam-footer-stat"><div class="cam-footer-num" style="color:#a78bfa;">1</div><div class="cam-footer-lbl">Phone</div></div>
+        <div class="cam-footer-stat"><div class="cam-footer-num" style="color:#22d3ee;">1</div><div class="cam-footer-lbl">Hand Raise</div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- How It Works (Computer Vision Pipeline) -->
-    <div class="mb-5">
-        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">⚙️ How It Works</h2>
-        <div class="row">
-            <div class="col-md-3 text-center mb-4 animate">
-                <div class="feature-icon mx-auto">📹</div>
-                <h5>1. Capture</h5>
-                <p>Upload classroom CCTV footage or connect a live camera feed.</p>
-            </div>
-            <div class="col-md-3 text-center mb-4 animate" style="animation-delay: 0.1s;">
-                <div class="feature-icon mx-auto">🧠</div>
-                <h5>2. Analyze</h5>
-                <p>AI models detect faces, eye movement, posture, and expressions.</p>
-            </div>
-            <div class="col-md-3 text-center mb-4 animate" style="animation-delay: 0.2s;">
-                <div class="feature-icon mx-auto">📊</div>
-                <h5>3. Classify</h5>
-                <p>Each student is labeled as Attentive, Sleepy, Distracted, or Neutral.</p>
-            </div>
-            <div class="col-md-3 text-center mb-4 animate" style="animation-delay: 0.3s;">
-                <div class="feature-icon mx-auto">📈</div>
-                <h5>4. Report</h5>
-                <p>View real‑time dashboards and download detailed engagement reports.</p>
-            </div>
-        </div>
-    </div>
+<div class="divider"></div>
 
-    <!-- Key Features (with glass cards) -->
-    <div class="mb-5">
-        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">✨ Key Features</h2>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="glass-card h-100 p-4">
-                    <div class="text-center">
-                        <i class="fas fa-chart-line fa-3x mb-3" style="color: var(--primary-color);"></i>
-                        <h5>Real‑Time Analytics</h5>
-                        <p>Live engagement heatmaps and trends to adjust teaching on the fly.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="glass-card h-100 p-4">
-                    <div class="text-center">
-                        <i class="fas fa-file-alt fa-3x mb-3" style="color: var(--primary-color);"></i>
-                        <h5>Automated Reports</h5>
-                        <p>Export PDF/CSV summaries for administrators and parents.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="glass-card h-100 p-4">
-                    <div class="text-center">
-                        <i class="fas fa-shield-alt fa-3x mb-3" style="color: var(--primary-color);"></i>
-                        <h5>Privacy First</h5>
-                        <p>All processing happens on‑premise; no video data leaves your institution.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="glass-card h-100 p-4">
-                    <div class="text-center">
-                        <i class="fas fa-chalkboard-teacher fa-3x mb-3" style="color: var(--primary-color);"></i>
-                        <h5>Actionable Insights</h5>
-                        <p>Identify at‑risk students early and improve teaching methods.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- INTRO -->
+<section class="intro-section" id="intro">
+  <div class="intro-inner fade-up d1">
+    <span class="intro-label">Introduction</span>
+    <h2>What is this system?</h2>
+    <p>
+      The AI-Driven Classroom Monitoring Engagement System is a smart solution that uses
+      <strong>Computer Vision</strong> and <strong>Artificial Intelligence</strong> to analyze
+      students' behaviour in real time. It captures live video from a classroom, detects student
+      faces, and classifies their engagement levels into <strong>seven key states</strong> —
+      <strong>Attentive, Sleepy, Distracted, Talking, Phone Usage, Hand Raises,</strong> and
+      <strong>Neutral</strong> — then presents actionable insights through a web dashboard built
+      with <strong>Django</strong>.
+    </p>
+  </div>
+</section>
 
-    <!-- Benefits for Schools/Colleges & Students -->
-    <div class="mb-5">
-        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">🎯 Benefits</h2>
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="glass-card p-4 h-100">
-                    <i class="fas fa-school fa-2x mb-3" style="color: var(--primary-color);"></i>
-                    <h5>For Schools & Colleges</h5>
-                    <ul class="mt-3">
-                        <li>Enhance teaching effectiveness with data‑driven insights.</li>
-                        <li>Improve student outcomes by identifying engagement gaps.</li>
-                        <li>Provide evidence for curriculum adjustments and teacher training.</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="glass-card p-4 h-100">
-                    <i class="fas fa-users fa-2x mb-3" style="color: var(--primary-color);"></i>
-                    <h5>For Students</h5>
-                    <ul class="mt-3">
-                        <li>More interactive lessons that hold attention.</li>
-                        <li>Early intervention when signs of fatigue or distraction appear.</li>
-                        <li>Greater overall engagement and interest in learning.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="divider"></div>
 
-    <!-- Technology Stack (with icons) -->
-    <div class="mb-5">
-        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">🛠️ Technology Stack</h2>
-        <div class="glass-card p-4 text-center">
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-                <span class="badge bg-light text-dark p-3"><i class="fab fa-python me-2"></i>Python</span>
-                <span class="badge bg-light text-dark p-3"><i class="fas fa-eye me-2"></i>OpenCV</span>
-                <span class="badge bg-light text-dark p-3"><i class="fas fa-brain me-2"></i>TensorFlow</span>
-                <span class="badge bg-light text-dark p-3"><i class="fas fa-database me-2"></i>Django</span>
-                <span class="badge bg-light text-dark p-3"><i class="fas fa-chart-simple me-2"></i>Chart.js</span>
-            </div>
-            <p class="mt-3 mb-0">State‑of‑the‑art deep learning models ensure high accuracy in engagement detection.</p>
-        </div>
+<!-- OBJECTIVES -->
+<section id="objectives" class="objectives">
+  <div class="section-header">
+    <span class="section-tag">Objectives</span>
+    <h2 class="section-title">What we aim to achieve</h2>
+    <p class="section-desc">Four core goals driving every design and technical decision in this system.</p>
+  </div>
+  <div class="objectives-grid">
+    <div class="obj-card">
+      <div class="obj-number">01 / OBJECTIVE</div>
+      <span class="obj-icon">🔍</span>
+      <div class="obj-title">Automated Real-Time Monitoring</div>
+      <div class="obj-text">Monitor student engagement automatically without manual intervention, using live video feed analysis powered by OpenCV and MediaPipe.</div>
     </div>
+    <div class="obj-card">
+      <div class="obj-number">02 / OBJECTIVE</div>
+      <span class="obj-icon">👩‍🏫</span>
+      <div class="obj-title">Reduce Teacher Workload</div>
+      <div class="obj-text">Eliminate the need for manual observation by teachers, allowing them to focus entirely on delivering quality instruction.</div>
+    </div>
+    <div class="obj-card">
+      <div class="obj-number">03 / OBJECTIVE</div>
+      <span class="obj-icon">🎯</span>
+      <div class="obj-title">Improve Teaching Quality</div>
+      <div class="obj-text">Use real-time engagement data to dynamically adapt teaching pace, methodology, and interaction style for maximum student impact.</div>
+    </div>
+    <div class="obj-card">
+      <div class="obj-number">04 / OBJECTIVE</div>
+      <span class="obj-icon">📈</span>
+      <div class="obj-title">Data-Driven Institutional Growth</div>
+      <div class="obj-text">Provide aggregated insights to institutions to update learning modules, improve curriculum, and drive measurable academic outcomes.</div>
+    </div>
+  </div>
+</section>
 
-    <!-- Demo Preview (Placeholder) -->
-    <div class="mb-5">
-        <h2 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">📺 See It in Action</h2>
-        <div class="demo-placeholder">
-            <i class="fas fa-play-circle fa-4x mb-3" style="color: var(--primary-color);"></i>
-            <h5>Live Engagement Analysis</h5>
-            <p>Upload a sample video to see how our system detects attentive, sleepy, distracted, and neutral students
-                in real time.</p>
-            <a href="{% url 'videos:video_upload' %}" class="btn btn-primary-glass">Try Demo</a>
-        </div>
-    </div>
+<div class="divider"></div>
 
-    <!-- Call to Action -->
-    <div class="text-center mt-5">
-        <div class="glass-card p-4">
-            <h4>Ready to transform your classroom?</h4>
-            <p class="mb-3">Start using AI to understand student engagement and improve learning outcomes.</p>
-            {% if user.is_authenticated %}
-            <a href="{% url 'videos:video_upload' %}" class="btn btn-primary-glass btn-lg px-5">Upload Your First
-                Video</a>
-            {% else %}
-            <a href="{% url 'register' %}" class="btn btn-primary-glass btn-lg px-5">Get Started Free</a>
-            {% endif %}
-        </div>
+<!-- MODULES -->
+<section id="modules" class="modules-section">
+  <div class="section-header">
+    <span class="section-tag">System Architecture</span>
+    <h2 class="section-title">Core System Modules</h2>
+    <p class="section-desc">Six tightly integrated modules form the backbone of the monitoring pipeline.</p>
+  </div>
+  <div class="modules-list">
+    <div class="module-row">
+      <div class="mod-num">01</div>
+      <div class="mod-name">
+        <div class="mod-icon bg-teal">📷</div>
+        <div><div class="mod-label">Video Capture</div><div class="mod-tech">OpenCV · CCTV / Webcam</div></div>
+      </div>
+      <div class="mod-desc">Captures real-time video using webcam or CCTV cameras. Continuously feeds frames to the processing pipeline for immediate analysis at 30fps.</div>
     </div>
-</div>
-{% endblock %}
+    <div class="module-row">
+      <div class="mod-num">02</div>
+      <div class="mod-name">
+        <div class="mod-icon bg-blue">🧠</div>
+        <div><div class="mod-label">Face Detection</div><div class="mod-tech">MediaPipe · Facial Landmarks</div></div>
+      </div>
+      <div class="mod-desc">Uses MediaPipe's face mesh solution to detect and track 468 facial landmarks per student, enabling multi-face identification within a single frame.</div>
+    </div>
+    <div class="module-row">
+      <div class="mod-num">03</div>
+      <div class="mod-name">
+        <div class="mod-icon bg-lblue">📊</div>
+        <div><div class="mod-label">Behaviour Analysis</div><div class="mod-tech">ML Classifier · Eye Tracking</div></div>
+      </div>
+      <div class="mod-desc">Classifies each detected face into one of seven engagement categories — Attentive, Sleepy, Distracted, Talking, Phone Usage, Hand Raises, and Neutral — based on eye openness, head pose, mouth ratio, and gaze direction.</div>
+    </div>
+    <div class="module-row">
+      <div class="mod-num">04</div>
+      <div class="mod-name">
+        <div class="mod-icon bg-indigo">⚡</div>
+        <div><div class="mod-label">Real-Time Processing</div><div class="mod-tech">OpenCV · Frame Pipeline</div></div>
+      </div>
+      <div class="mod-desc">Processes each frame in under 33ms to maintain real-time performance. Applies preprocessing, detection, classification, and annotation in a single optimized loop.</div>
+    </div>
+    <div class="module-row">
+      <div class="mod-num">05</div>
+      <div class="mod-name">
+        <div class="mod-icon bg-slate">🌐</div>
+        <div><div class="mod-label">Web Dashboard</div><div class="mod-tech">Django · REST API · WebSocket</div></div>
+      </div>
+      <div class="mod-desc">A Django-powered web interface displays live engagement statistics, historical trends, class-level summaries, and exportable reports for teachers and administrators.</div>
+    </div>
+    <div class="module-row">
+      <div class="mod-num">06</div>
+      <div class="mod-name">
+        <div class="mod-icon bg-sky">💾</div>
+        <div><div class="mod-label">Data Storage & Analytics</div><div class="mod-tech">Django ORM · SQLite / PostgreSQL</div></div>
+      </div>
+      <div class="mod-desc">All engagement records are persisted to a database with timestamps, enabling session-level analytics, trend analysis, and institutional reporting over time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="pipeline-section">
+  <div class="section-header">
+    <span class="section-tag">Data Flow</span>
+    <h2 class="section-title">Processing Pipeline</h2>
+  </div>
+  <div class="pipeline-flow">
+    <div class="pipe-step"><div class="pipe-step-icon">📹</div><div class="pipe-step-label">Video Input</div><div class="pipe-step-sub">Webcam / CCTV</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-icon">🖼️</div><div class="pipe-step-label">Frame Capture</div><div class="pipe-step-sub">OpenCV · 30fps</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-icon">👁️</div><div class="pipe-step-label">Face Detection</div><div class="pipe-step-sub">MediaPipe</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-icon">🤖</div><div class="pipe-step-label">Classification</div><div class="pipe-step-sub">ML Model</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-icon">📡</div><div class="pipe-step-label">API Broadcast</div><div class="pipe-step-sub">Django REST</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-icon">📊</div><div class="pipe-step-label">Dashboard</div><div class="pipe-step-sub">Live Web UI</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-icon">💾</div><div class="pipe-step-label">Database</div><div class="pipe-step-sub">Analytics Store</div></div>
+  </div>
+</section>
+
+<!-- BEHAVIOR -->
+<section id="behavior" class="behavior-section">
+  <div class="section-header">
+    <span class="section-tag">Engagement Categories</span>
+    <h2 class="section-title">Student Behaviour Classification</h2>
+    <p class="section-desc">The system recognises seven distinct engagement states, each detected through specific facial landmarks, eye metrics, mouth ratios, and head-pose signals.</p>
+  </div>
+  <div class="behavior-cards">
+    <div class="beh-card beh-attentive">
+      <span class="beh-emoji">🧑‍🎓</span>
+      <div class="beh-name">Attentive</div>
+      <div class="beh-desc">Student is focused, eyes open, and facing forward — actively engaged with the lecture or activity.</div>
+      <ul class="beh-signals">
+        <li>Eyes fully open (EAR above threshold)</li>
+        <li>Head facing forward (low yaw/pitch)</li>
+        <li>Stable gaze direction</li>
+        <li>Upright posture</li>
+      </ul>
+    </div>
+    <div class="beh-card beh-sleepy">
+      <span class="beh-emoji">😴</span>
+      <div class="beh-name">Sleepy</div>
+      <div class="beh-desc">Student shows signs of drowsiness — drooping eyelids, slow blinks, or a tilted head position.</div>
+      <ul class="beh-signals">
+        <li>Drooping eyelids (EAR &lt; 0.22)</li>
+        <li>Slow blink rate</li>
+        <li>Head tilt detected</li>
+        <li>Prolonged eye closure</li>
+      </ul>
+    </div>
+    <div class="beh-card beh-distracted">
+      <span class="beh-emoji">👀</span>
+      <div class="beh-name">Distracted</div>
+      <div class="beh-desc">Student's head or gaze is turned away from the board or instructor, indicating loss of focus.</div>
+      <ul class="beh-signals">
+        <li>Head yaw &gt; 25° deviation</li>
+        <li>Pitch &gt; 20° (looking down)</li>
+        <li>Frequent head turns</li>
+        <li>Gaze off-screen</li>
+      </ul>
+    </div>
+    <div class="beh-card beh-talking">
+      <span class="beh-emoji">🗣️</span>
+      <div class="beh-name">Talking</div>
+      <div class="beh-desc">Student's mouth is open and moving — detected via Mouth Aspect Ratio indicating active speech.</div>
+      <ul class="beh-signals">
+        <li>Mouth Aspect Ratio &gt; 0.35</li>
+        <li>Lip separation detected</li>
+        <li>Continuous mouth movement</li>
+        <li>Landmarks 13/14 distance change</li>
+      </ul>
+    </div>
+    <div class="beh-card beh-phone">
+      <span class="beh-emoji">📱</span>
+      <div class="beh-name">Phone Usage</div>
+      <div class="beh-desc">Student is looking steeply downward with a narrow gaze angle, indicating interaction with a handheld device.</div>
+      <ul class="beh-signals">
+        <li>Head pitch &gt; 28° (steep downward)</li>
+        <li>Yaw &lt; 12° (narrow focus)</li>
+        <li>Sustained downward gaze</li>
+        <li>Face partially occluded</li>
+      </ul>
+    </div>
+    <div class="beh-card beh-handraise">
+      <span class="beh-emoji">✋</span>
+      <div class="beh-name">Hand Raise</div>
+      <div class="beh-desc">Student's face is tilted upward, indicating they have raised their hand to ask or answer a question.</div>
+      <ul class="beh-signals">
+        <li>Head pitch &lt; -15° (face tilted up)</li>
+        <li>Upward gaze vector detected</li>
+        <li>Tracked independently per face</li>
+        <li>Works for all detected students</li>
+      </ul>
+    </div>
+    <div class="beh-card beh-neutral">
+      <span class="beh-emoji">😶</span>
+      <div class="beh-name">Neutral</div>
+      <div class="beh-desc">Student is present and awake but shows no clear signs of active engagement or distraction.</div>
+      <ul class="beh-signals">
+        <li>Eyes open, minimal focus</li>
+        <li>Low facial expressivity</li>
+        <li>Passive body language</li>
+        <li>No interaction signals</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BENEFITS -->
+<section class="benefits-section">
+  <div class="section-header">
+    <span class="section-tag">Institutional Impact</span>
+    <h2 class="section-title">Benefits for Institutions</h2>
+  </div>
+  <div class="benefits-grid">
+    <div class="ben-card">
+      <div class="ben-icon-wrap">🎓</div>
+      <div class="ben-title">Interactive Classes</div>
+      <div class="ben-desc">Teachers can identify disengagement patterns in real time and immediately adjust their delivery style, boosting class participation and energy.</div>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">📚</div>
+      <div class="ben-title">Updated Learning Modules</div>
+      <div class="ben-desc">Aggregated engagement data reveals which topics lose students' attention, guiding curriculum teams to redesign underperforming lessons.</div>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">🚀</div>
+      <div class="ben-title">Student Engagement</div>
+      <div class="ben-desc">With data-backed interventions, institutions can proactively address distraction and drowsiness, creating a culture of active, focused learning.</div>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">📊</div>
+      <div class="ben-title">Data-Driven Reports</div>
+      <div class="ben-desc">Session-level and historical reports give administrators a clear picture of classroom health and the ROI of teaching improvements over time.</div>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">🌐</div>
+      <div class="ben-title">Online Class Support</div>
+      <div class="ben-desc">The system can be integrated with video platforms to monitor remote learners, extending smart monitoring beyond physical classrooms.</div>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">⚙️</div>
+      <div class="ben-title">Scalable Infrastructure</div>
+      <div class="ben-desc">The Django backend supports multiple simultaneous classroom streams, making it deployable institution-wide with minimal configuration changes.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section id="faq" class="faq-section">
+  <div class="section-header">
+    <span class="section-tag">FAQ</span>
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-desc">Common questions about the project, its technology, and real-world application.</p>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">01</span> What is this project about?</div>
+      <div class="faq-a">An AI-based system that monitors student engagement in classrooms in real time using computer vision and facial analysis.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">02</span> Which technologies are used?</div>
+      <div class="faq-a">Python, OpenCV, MediaPipe, and Django form the core stack for video processing, face detection, and web-based result display.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">03</span> What is the role of OpenCV?</div>
+      <div class="faq-a">OpenCV handles image processing, real-time video capture, frame preprocessing, and visual annotation of detection results.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">04</span> Why MediaPipe for face detection?</div>
+      <div class="faq-a">MediaPipe provides fast, accurate, on-device face mesh detection with 468 facial landmarks — ideal for real-time engagement classification.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">05</span> What are the four behaviour categories?</div>
+      <div class="faq-a">Attentive (focused), Sleepy (drowsy), Distracted (looking away), and Neutral (present but passive).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">06</span> Is the system real-time?</div>
+      <div class="faq-a">Yes — the system processes live video frames continuously at up to 30fps, with minimal latency between capture and dashboard update.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">07</span> What is Django used for?</div>
+      <div class="faq-a">Django serves as the web framework building the backend API, data models, admin interface, and live web dashboard for result display.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">08</span> How does behaviour detection work?</div>
+      <div class="faq-a">By analysing facial landmarks — eye aspect ratio, head yaw/pitch angle, and gaze direction — to infer engagement state per student.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">09</span> What are the limitations?</div>
+      <div class="faq-a">Performance may degrade in poor lighting conditions, with low camera quality, or where student privacy regulations restrict facial monitoring.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><span class="faq-num">10</span> Can it work for online classes?</div>
+      <div class="faq-a">Yes — with integration to video conferencing platforms like Zoom or Meet, the system can extend monitoring to remote learning sessions.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <span class="section-tag">Get Started</span>
+  <h2>Ready to monitor your classroom?</h2>
+  <p>Join institutions using AI-powered engagement tracking to transform how students learn and teachers teach.</p>
+  <div class="cta-btns">
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="btn-cta-register">Go to Dashboard</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn-cta-login">Login to Dashboard</a>
+      <a href="{% url 'register' %}" class="btn-cta-register">Create Free Account</a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="custom-dark-footer">
+  <div class="container">
+    <div class="footer-social-icons">
+      <a href="mailto:classroomaimonitor@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+      <a href="https://github.com/classroomAImonitor/ai-classroom-engagement-system" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+      <a href="https://www.youtube.com/@classroom-ai-monitor" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+      <a href="https://www.linkedin.com/in/classroom-ai-monitor-undefined-1831b6400" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+      <a href="https://x.com/SmartEngageAI" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+    </div>
+    <div class="footer-nav-links">
+      <a href="/privacy-protocol/">Privacy Policy</a>
+      <a href="mailto:classroomaimonitor@gmail.com">Contact Us</a>
+    </div>
+  </div>
+  <div class="footer-bottom-copy">
+    Copyright &copy; 2026  Designed by <span>  Sadiq</span>
+  </div>
+</footer>
+
+</body>
+</html>

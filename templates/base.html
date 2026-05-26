@@ -1,239 +1,429 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AI Classroom Engagement Monitoring{% endblock %}</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    
-    <!-- Google Fonts: Poppins & Inter -->
+    <title>{% block title %}Classroom AI Monitor{% endblock %}</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
 
-    
-    <!-- Custom CSS -->
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Core Styles -->
     <style>
-        /* Essential layout styles that don't conflict with Claymorphism */
+        :root {
+            --bg-base: #D6E6F5;
+            --bg-mid: #C2D8EE;
+            --fog: #E0EDF7;
+            --white: #FFFFFF;
+            --navy: #1A3A5C;
+            --navy-mid: #2B5282;
+            --navy-light: #3A6FA8;
+            --steel: #5B8DB8;
+            --steel-light: #87B3D4;
+            --sky: #A8CCE8;
+            --sky-light: #C8E0F0;
+            --text-dark: #1A3050;
+            --text-mid: #3B6080;
+            --text-muted: #7A9DB8;
+            --green: #2E8B6A;
+            --red: #C0392B;
+            --amber: #B07A2A;
+            --purple: #5B4A8A;
+            --shadow-sm: 0 2px 12px rgba(26, 58, 92, 0.07);
+            --shadow-md: 0 6px 24px rgba(26, 58, 92, 0.11);
+            --shadow-lg: 0 16px 48px rgba(26, 58, 92, 0.15);
+            --r: 14px;
+            --r-sm: 9px;
+            --r-lg: 20px;
+            --r-xl: 26px;
+            --font: 'DM Sans', sans-serif;
+            --font-display: 'Playfair Display', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --nav-h: 60px;
+            --nav-bg: #1C1C1E;
+            --nav-border: rgba(255, 255, 255, 0.08);
+            --nav-text: rgba(255, 255, 255, 0.72);
+            --nav-text-active: #ffffff;
+            --nav-active-bg: #2563EB;
+
+            /* Unified Brand Palette mappings */
+            --primary: var(--navy);
+            --primary-rgb: 26, 58, 92;
+            --secondary: var(--steel);
+            --secondary-rgb: 91, 141, 184;
+            --accent: #2563EB;
+            --accent-rgb: 37, 99, 235;
+            --text-main: var(--text-dark);
+            --glass-surface: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+        }
+
+        .glass-card {
+            background: var(--glass-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--r-lg);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
         body {
-            min-height: 100vh;
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg-base);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-mid);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--steel-light);
+            border-radius: 10px;
+        }
+
+        /* Navbar Styles from dashboard.html */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            height: var(--nav-h);
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--nav-border);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 1rem;
+        }
+
+        .nav-logo {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: .6rem;
+            text-decoration: none;
         }
-        .main-content {
-            flex: 1;
-            padding: 40px 20px;
+
+        .nav-logo-mark {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #2563EB, #60A5FA);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.45);
         }
-    </style>
-    
-    {% block extra_css %}
-    {% endblock %}
-    
-    <!-- Theme Script to prevent FOUC (Flash of Unstyled Content) -->
-    <script>
-        const savedTheme = localStorage.getItem('clayTheme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    </script>
-</head>
-<body>
-    <!-- Fluid Background Blobs -->
-    <div class="fluid-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
 
-    <!-- Navigation Bar (Visible only when logged in) -->
-    {% if user.is_authenticated %}
-    <div class="container glass-nav-container">
-        <nav class="navbar navbar-expand-lg glass-surface glass-nav">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}" style="text-decoration: none;">
-                <span style="font-weight: 900; color: var(--primary); font-size: 1.5rem; letter-spacing: -1.5px;">AI</span>
-                <span style="font-weight: 600; color: var(--text-main); font-size: 1.5rem; margin-left: 4px;">Engagement</span>
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: none;">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="glass-link {% if request.resolver_match.url_name == 'webcam_demo' %}active{% endif %}" href="{% url 'webcam_demo' %}">
-                            <i class="fas fa-camera-retro me-1"></i> Webcam
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="glass-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}" href="{% url 'analytics' %}">
-                            <i class="fas fa-chart-line me-1"></i> Analytics
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="glass-link {% if 'video' in request.path and 'upload' not in request.path %}active{% endif %}" href="{% url 'videos:video_list' %}">
-                            <i class="fas fa-play-circle me-1"></i> Videos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="glass-link {% if request.resolver_match.url_name == 'video_upload' %}active{% endif %}" href="{% url 'videos:video_upload' %}">
-                            <i class="fas fa-cloud-upload-alt me-1"></i> Upload
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="glass-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'reports' %}">
-                            <i class="fas fa-file-signature me-1"></i> Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="glass-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
-                            <i class="fas fa-question-circle me-1"></i> About
-                        </a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="nav-logout-btn" href="{% url 'logout' %}">
-                            <i class="fas fa-power-off me-1"></i> Logout
-                        </a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <button id="themeToggleBtn" class="btn border-0 shadow-sm" style="border-radius: 50%; width: 44px; height: 44px; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: var(--text-main); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
-                            🌓
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </div>
-    {% endif %}
+        .nav-logo-text strong {
+            font-size: .92rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-            
-            {% block content %}
-            {% endblock %}
-        </div>
-    </main>
+        .nav-logo-text em {
+            font-style: normal;
+            font-size: .92rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.55);
+        }
 
-    <!-- Footer -->
-    <footer class="glass-footer">
-        <div class="container">
-            <div class="row g-4 text-start">
-                <!-- Column 1: Neural HUD -->
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-section-title">Neural HUD</h5>
-                    <div class="mb-3 d-flex flex-column gap-1">
-                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Cloud Status: <span class="text-success">Online</span></small>
-                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Engagement: <span class="text-primary">{{ hud_avg_engagement }}%</span></small>
-                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Processed: <span class="text-primary">{{ hud_processed_videos }}</span></small>
-                    </div>
-                    <a href="{% url 'webcam_demo' %}" class="footer-link">Webcam Live HUD</a>
-                    <a href="{% url 'analytics' %}" class="footer-link">Analytics Dashboard</a>
-                    <a href="{% url 'about' %}" class="footer-link">Vision & Mission</a>
-                    <a href="{% url 'videos:video_list' %}" class="footer-link">Footage Archive</a>
-                </div>
+        .nav-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .18rem;
+            list-style: none;
+        }
 
-                <!-- Column 2: Resources -->
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-section-title">Resources</h5>
-                    <a href="#" class="footer-link">Technical Documentation</a>
-                    <a href="#" class="footer-link">Research Paper</a>
-                    <a href="#" class="footer-link">MediaPipe Pipeline</a>
-                    <a href="#" class="footer-link">Source GitHub</a>
-                </div>
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: .38rem;
+            padding: .4rem .92rem;
+            border-radius: 999px;
+            color: var(--nav-text);
+            text-decoration: none;
+            font-size: .8rem;
+            font-weight: 500;
+            transition: all .2s;
+        }
 
-                <!-- Column 3: Compliance -->
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-section-title">Compliance</h5>
-                    <a href="#" class="footer-link">Privacy Protocol</a>
-                    <a href="#" class="footer-link">Data Retention</a>
-                    <a href="#" class="footer-link">FERPA Compliance</a>
-                    <a href="#" class="footer-link">Ethics in AI</a>
-                </div>
+        .nav-links a:hover {
+            color: var(--nav-text-active);
+            background: rgba(255, 255, 255, 0.08);
+        }
 
-                <!-- Column 4: Connect -->
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-section-title">Connect</h5>
-                    <div class="pe-xl-5">
-                        <a href="#" class="social-link-hud">
-                            <i class="fab fa-github"></i> GitHub
-                        </a>
-                        <a href="#" class="social-link-hud">
-                            <i class="fab fa-linkedin-in"></i> LinkedIn
-                        </a>
-                        <a href="#" class="social-link-hud">
-                            <i class="fab fa-youtube"></i> YouTube
-                        </a>
-                        <a href="#" class="social-link-hud">
-                            <i class="fab fa-x-twitter"></i> Twitter (X)
-                        </a>
-                    </div>
-                </div>
-            </div>
+        .nav-links a.active {
+            background: var(--nav-active-bg);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.45);
+        }
 
-            <div class="footer-bottom-bar">
-                <p class="mb-0">Made with ❤️ and ☕ in India</p>
-            </div>
-        </div>
-    </footer>
+        .nbadge {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 20px;
+            padding: .06rem .4rem;
+            font-size: .58rem;
+            font-weight: 700;
+        }
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    {% block extra_js %}
-    {% endblock %}
-    
-    <!-- Theme & Interactivity Logic -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Theme Toggle
-            const themeBtn = document.getElementById('themeToggleBtn');
-            if (themeBtn) {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                themeBtn.innerHTML = currentTheme === 'dark' ? '☀️' : '🌙';
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
 
-                themeBtn.addEventListener('click', () => {
-                    let theme = document.documentElement.getAttribute('data-theme');
-                    let newTheme = theme === 'dark' ? 'light' : 'dark';
-                    
-                    document.documentElement.setAttribute('data-theme', newTheme);
-                    localStorage.setItem('clayTheme', newTheme);
-                    
-                    themeBtn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
-                    themeBtn.style.transform = 'scale(0.9)';
-                    setTimeout(() => themeBtn.style.transform = 'scale(1)', 150);
-                });
+        .live-chip {
+            display: flex;
+            align-items: center;
+            gap: .35rem;
+            background: rgba(46, 139, 106, 0.18);
+            border: 1px solid rgba(46, 139, 106, 0.3);
+            border-radius: 20px;
+            padding: .28rem .78rem;
+            font-size: .68rem;
+            font-weight: 600;
+            color: #4ade80;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5);
             }
 
-            // Mouse Tracking Parallax
-            document.addEventListener('mousemove', (e) => {
-                const parallaxElements = document.querySelectorAll('.parallax-element');
-                const x = (window.innerWidth / 2 - e.clientX) / 60;
-                const y = (window.innerHeight / 2 - e.clientY) / 60;
+            50% {
+                opacity: .7;
+                box-shadow: 0 0 0 5px rgba(74, 222, 128, 0);
+            }
+        }
 
-                parallaxElements.forEach(el => {
-                    const speed = el.getAttribute('data-speed') || 1;
-                    el.style.transform = `translateX(${x * speed}px) translateY(${y * speed}px)`;
-                });
+        .nav-logout {
+            display: flex;
+            align-items: center;
+            gap: .38rem;
+            padding: .4rem .88rem;
+            border-radius: 999px;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            font-size: .78rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+        .nav-logout:hover {
+            background: rgba(239, 68, 68, 0.22);
+            color: #fca5a5;
+        }
+
+        .page {
+            padding: 2rem 2.25rem 3rem;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Footer Styles */
+        footer {
+            background: var(--white);
+            border-top: 1px solid rgba(91, 141, 184, 0.14);
+            padding: 2rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .ft-soc {
+            display: flex;
+            justify-content: center;
+            gap: .55rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .ft-soc a {
+            width: 38px;
+            height: 38px;
+            background: var(--fog);
+            border: 1px solid rgba(91, 141, 184, 0.16);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: .88rem;
+            text-decoration: none;
+            transition: all .25s;
+        }
+
+        .ft-soc a:hover {
+            background: var(--navy);
+            color: #fff;
+            transform: translateY(-4px);
+        }
+
+        .ft-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 1.4rem;
+            list-style: none;
+        }
+
+        .ft-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: .7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: color .2s;
+        }
+
+        .ft-nav a:hover {
+            color: var(--navy);
+        }
+
+        .ft-copy {
+            border-top: 1px solid rgba(91, 141, 184, 0.11);
+            padding-top: .85rem;
+            font-size: .68rem;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+        }
+
+        .ft-copy span {
+            color: var(--navy);
+            font-weight: 800;
+        }
+
+        /* Animations */
+        .fu {
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp .6s cubic-bezier(.19, 1, .22, 1) forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="nav-logo">
+            <div class="nav-logo-mark"><i class="fas fa-brain"></i></div>
+            <div class="nav-logo-text">
+                <strong>Classroom</strong><em>AI Monitor</em>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+            <li><a href="{% url 'webcam_demo' %}" class="{% if request.resolver_match.url_name == 'webcam_demo' %}active{% endif %}"><i class="fas fa-camera-retro"></i>Webcam <span
+                        class="nbadge">Live</span></a></li>
+            <li><a href="{% url 'analytics' %}" class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}"><i class="fas fa-chart-line"></i>Analytics</a></li>
+            <li><a href="{% url 'videos:video_list' %}" class="{% if request.resolver_match.view_name == 'videos:video_list' %}active{% endif %}"><i class="fas fa-play-circle"></i>Videos</a></li>
+            <li><a href="{% url 'videos:video_upload' %}" class="{% if request.resolver_match.view_name == 'videos:video_upload' %}active{% endif %}"><i class="fas fa-cloud-upload-alt"></i>Upload</a></li>
+            <li><a href="{% url 'reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}"><i class="fas fa-file-signature"></i>Reports</a></li>
+            <li><a href="{% url 'privacy_protocol' %}" class="{% if request.resolver_match.url_name == 'privacy_protocol' %}active{% endif %}"><i class="fas fa-shield-halved"></i>Privacy</a></li>
+        </ul>
+
+        <div class="nav-right">
+
+            <a href="{% url 'logout' %}" class="nav-logout"><i class="fas fa-power-off"></i>Logout</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <div class="ft-soc">
+            <a href="#"><i class="fas fa-envelope"></i></a>
+            <a href="https://github.com/classroomAImonitor" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://www.youtube.com/@classroom-ai-monitor" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://x.com/SmartEngageAI" target="_blank"><i class="fab fa-twitter"></i></a>
+        </div>
+        <ul class="ft-nav">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'analytics' %}">Analytics</a></li>
+        <li><a href="{% url 'reports' %}">Reports</a></li>
+        <li><a href="{% url 'privacy_protocol' %}">Privacy Policy</a></li>
+        <li><a href="{% url 'about' %}">Contact Us</a></li>
+        </ul>
+        <div class="ft-copy">Copyright &copy; 2026 Designed by <span>Sadiq</span></div>
+    </footer>
+
+    <script>
+        // Common Ripple Effect
+        document.querySelectorAll('.action-btn, .btn, .nav-links a').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                var r = document.createElement('span');
+                var rect = this.getBoundingClientRect();
+                r.style.cssText = 'position:absolute;border-radius:50%;background:rgba(255,255,255,0.35);width:6px;height:6px;top:' + (e.clientY - rect.top - 3) + 'px;left:' + (e.clientX - rect.left - 3) + 'px;transform:scale(0);animation:ripple .55s ease-out forwards;pointer-events:none;';
+                this.appendChild(r);
+                setTimeout(function () { r.remove(); }, 600);
             });
         });
+
+        var rippleStyle = document.createElement('style');
+        rippleStyle.textContent = '@keyframes ripple{to{transform:scale(30);opacity:0;}}';
+        document.head.appendChild(rippleStyle);
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
+
 </html>

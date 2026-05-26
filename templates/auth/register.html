@@ -1,54 +1,758 @@
-{% extends "auth_base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Join Classroom AI Monitor{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+:root {
+  --navy-900:   #040d1a;
+  --navy-800:   #071428;
+  --navy-700:   #0a1f3d;
+  --navy-600:   #0f2d56;
+  --navy:       #1a3a5c;
+  --steel:      #1b3d5b;
+  --dusty:      #5b8db8;
+  --blue-grey:  #7ba7c2;
+  --light-blue: #a8ccdf;
+  --pale:       #c8e0ef;
+  --white:      #ffffff;
+}
 
-{% block title %}Join Neural Network - AI Classroom Engagement{% endblock %}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; font-family:'Outfit',sans-serif; background:var(--navy-900); overflow-x:hidden; }
+body { display:flex; align-items:center; justify-content:center; min-height:100vh; position:relative; }
 
-{% block auth_content %}
-<form method="post" action="{% url 'register' %}">
-    {% csrf_token %}
-    
-    <div class="mb-3">
-        <label for="id_username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="id_username" name="username" required>
-        <div class="form-text">Required. 150 characters or fewer.</div>
-    </div>
-    
-    <div class="mb-3">
-        <label for="id_email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="id_email" name="email" required>
-    </div>
-    
-    <div class="mb-3">
-        <label for="id_password1" class="form-label">Password</label>
-        <input type="password" class="form-control" id="id_password1" name="password1" required>
-        <div class="form-text">
-            Your password must contain at least 8 characters.
+#bgCanvas { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
+
+.noise {
+  position:fixed; inset:0; z-index:1; opacity:.025; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;
+}
+.vignette {
+  position:fixed; inset:0; z-index:2; pointer-events:none;
+  background:radial-gradient(ellipse 75% 75% at 50% 50%, transparent 40%, rgba(4,13,26,0.65) 100%);
+}
+
+.auth-page {
+  position:relative; z-index:10; width:100%; min-height:100vh;
+  display:flex; align-items:center; justify-content:center; padding:2rem 1rem;
+}
+
+.auth-wrap {
+  display:flex; align-items:center; gap:5rem;
+  max-width:980px; width:100%;
+  animation:wrapIn .9s cubic-bezier(.19,1,.22,1) both;
+}
+@keyframes wrapIn {
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ── LEFT PANEL ── */
+.auth-left {
+  flex:1; display:flex; flex-direction:column; gap:2rem;
+  animation:leftIn .8s .15s cubic-bezier(.19,1,.22,1) both;
+}
+@keyframes leftIn {
+  from{opacity:0;transform:translateX(-30px);}
+  to{opacity:1;transform:translateX(0);}
+}
+.brand-mark { display:flex; align-items:center; gap:.75rem; }
+.brand-icon-wrap {
+  position:relative; width:52px; height:52px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.brand-icon-bg {
+  position:absolute; inset:0;
+  background:linear-gradient(135deg,var(--steel),var(--navy-600));
+  border-radius:15px;
+  animation:iconGlow 3s ease-in-out infinite alternate;
+}
+@keyframes iconGlow {
+  from{box-shadow:0 0 20px rgba(45,106,159,0.5);}
+  to{box-shadow:0 0 45px rgba(91,141,184,0.75),0 0 80px rgba(45,106,159,0.25);}
+}
+.brand-icon-wrap i { position:relative; z-index:1; font-size:1.3rem; color:var(--light-blue); }
+.brand-name { font-size:1.1rem; font-weight:700; color:var(--white); letter-spacing:-.01em; }
+.brand-name span { color:var(--blue-grey); font-weight:400; }
+
+.left-headline {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2.2rem,4vw,3.2rem);
+  font-weight:700; line-height:1.1; color:var(--white); letter-spacing:-.03em;
+}
+.left-headline .hl {
+  background:linear-gradient(120deg,var(--light-blue),var(--dusty),var(--blue-grey));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.left-desc { font-size:.9rem; color:var(--blue-grey); line-height:1.8; max-width:340px; opacity:.85; }
+
+/* ── STEPS LIST ── */
+.onboard-steps { display:flex; flex-direction:column; gap:.9rem; }
+.step-item {
+  display:flex; align-items:flex-start; gap:.9rem;
+  animation:stepIn .6s cubic-bezier(.19,1,.22,1) both;
+}
+.step-item:nth-child(1){animation-delay:.3s;}
+.step-item:nth-child(2){animation-delay:.42s;}
+.step-item:nth-child(3){animation-delay:.54s;}
+@keyframes stepIn{from{opacity:0;transform:translateX(-18px);}to{opacity:1;transform:translateX(0);}}
+
+.step-num {
+  width:32px; height:32px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--steel),var(--navy-600));
+  border-radius:10px; font-size:.72rem; font-weight:700;
+  color:var(--light-blue); letter-spacing:.5px;
+  box-shadow:0 4px 16px rgba(45,106,159,0.35);
+}
+.step-text strong {
+  display:block; font-size:.82rem; font-weight:600; color:var(--white); margin-bottom:.1rem;
+}
+.step-text span { font-size:.74rem; color:var(--blue-grey); opacity:.75; line-height:1.5; }
+
+.left-pills { display:flex; flex-wrap:wrap; gap:.55rem; }
+.pill {
+  display:flex; align-items:center; gap:.38rem;
+  padding:.35rem .85rem; border-radius:999px;
+  border:1px solid rgba(91,141,184,0.22);
+  background:rgba(45,106,159,0.1);
+  font-size:.7rem; font-weight:500; color:var(--blue-grey);
+  letter-spacing:.3px; backdrop-filter:blur(8px); transition:all .25s;
+}
+.pill i { font-size:.62rem; color:var(--dusty); }
+.pill:hover { background:rgba(45,106,159,0.2); border-color:rgba(91,141,184,0.4); color:var(--light-blue); }
+
+/* ── AUTH CARD ── */
+.auth-card {
+  width:420px; flex-shrink:0;
+  background:rgba(30,82,133,0.82);
+  backdrop-filter:blur(40px) saturate(1.5);
+  -webkit-backdrop-filter:blur(40px) saturate(1.5);
+  border:1px solid rgba(91,141,184,0.18);
+  border-radius:28px; padding:2.4rem 2.4rem 1.8rem;
+  position:relative; overflow:hidden;
+  box-shadow:0 0 0 1px rgba(45,106,159,0.08),0 24px 60px rgba(4,13,26,0.7),0 0 80px rgba(45,106,159,0.06);
+  animation:cardIn .8s .1s cubic-bezier(.19,1,.22,1) both;
+}
+@keyframes cardIn {
+  from{opacity:0;transform:translateX(30px) scale(.97);}
+  to{opacity:1;transform:translateX(0) scale(1);}
+}
+.auth-card::before {
+  content:''; position:absolute; top:0; left:15%; right:15%; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(168,204,223,0.6),transparent);
+}
+.auth-card::after {
+  content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px;
+  background:radial-gradient(circle,rgba(45,106,159,0.18),transparent 70%); pointer-events:none;
+}
+.card-bottom-glow {
+  position:absolute; bottom:-50px; left:50%; transform:translateX(-50%);
+  width:260px; height:100px;
+  background:radial-gradient(ellipse,rgba(45,106,159,0.2),transparent 70%); pointer-events:none;
+}
+
+/* ── PROGRESS DOTS ── */
+.reg-progress {
+  display:flex; align-items:center; gap:.45rem; margin-bottom:1.6rem;
+}
+.prog-dot {
+  height:4px; border-radius:999px; transition:all .4s ease;
+}
+.prog-dot.active { width:28px; background:var(--light-blue); box-shadow:0 0 10px rgba(168,204,223,0.5); }
+.prog-dot.done   { width:16px; background:var(--steel); }
+.prog-dot.idle   { width:10px; background:rgba(91,141,184,0.25); }
+
+.card-header-area { margin-bottom:1.5rem; }
+.card-eyebrow {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.63rem; font-weight:600; letter-spacing:2px; text-transform:uppercase;
+  color:var(--dusty); background:rgba(45,106,159,0.12);
+  border:1px solid rgba(91,141,184,0.18); border-radius:999px; padding:.22rem .75rem; margin-bottom:.85rem;
+}
+.card-eyebrow::before {
+  content:''; width:5px; height:5px; background:var(--dusty); border-radius:50%;
+  animation:blinkDot 2s ease-in-out infinite;
+}
+@keyframes blinkDot { 0%,100%{opacity:1;} 50%{opacity:.2;} }
+
+.card-title {
+  font-family:'Space Grotesk',sans-serif; font-size:1.45rem; font-weight:700;
+  color:var(--white); letter-spacing:-.02em; line-height:1.15; margin-bottom:.3rem;
+}
+.card-sub { font-size:.78rem; color:var(--blue-grey); opacity:.7; }
+
+/* ── FORM ROW ── */
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+
+/* ── FORM ── */
+.form-label {
+  font-size:.67rem !important; font-weight:600 !important;
+  letter-spacing:1.8px !important; text-transform:uppercase !important;
+  color:var(--blue-grey) !important; margin-bottom:.4rem !important; display:block;
+}
+.input-wrap { position:relative; }
+.input-icon {
+  position:absolute; left:.95rem; top:50%; transform:translateY(-50%);
+  font-size:.75rem; color:rgba(91,141,184,0.45); pointer-events:none; transition:color .25s; z-index:2;
+}
+.form-control {
+  width:100% !important;
+  background:rgba(255,255,255,0.04) !important;
+  border:1px solid rgba(91,141,184,0.2) !important;
+  border-radius:13px !important; color:var(--white) !important;
+  font-family:'Outfit',sans-serif !important; font-size:.88rem !important;
+  padding:.72rem 1rem .72rem 2.5rem !important; transition:all .25s ease !important;
+  caret-color:var(--blue-grey);
+}
+.form-control::placeholder { color:rgba(91,141,184,0.3) !important; }
+.form-control:focus {
+  background:rgba(45,106,159,0.1) !important;
+  border-color:rgba(91,141,184,0.55) !important;
+  box-shadow:0 0 0 3px rgba(45,106,159,0.15),0 0 24px rgba(45,106,159,0.12) !important;
+  outline:none !important;
+}
+.input-wrap:focus-within .input-icon { color:var(--blue-grey); }
+
+/* ── VALID / INVALID STATES ── */
+.form-control.is-valid {
+  border-color:rgba(52,211,153,0.5) !important;
+  background:rgba(52,211,153,0.04) !important;
+}
+.form-control.is-invalid {
+  border-color:rgba(248,113,113,0.5) !important;
+  background:rgba(248,113,113,0.04) !important;
+}
+.input-status {
+  position:absolute; right:.85rem; top:50%; transform:translateY(-50%);
+  font-size:.7rem; opacity:0; transition:opacity .25s; pointer-events:none;
+}
+.input-status.valid   { color:#34d399; opacity:1; }
+.input-status.invalid { color:#f87171; opacity:1; }
+
+/* ── FORM TEXT ── */
+.form-text {
+  font-size:.67rem !important; color:rgba(123,167,194,0.5) !important;
+  margin-top:.3rem !important; display:block; padding-left:.2rem;
+}
+
+/* ── PASSWORD STRENGTH ── */
+.pw-strength-wrap { margin-top:.5rem; }
+.pw-bars { display:flex; gap:4px; margin-bottom:.3rem; }
+.pw-bar {
+  flex:1; height:3px; border-radius:999px;
+  background:rgba(91,141,184,0.15); transition:background .35s ease;
+}
+.pw-bar.weak   { background:#f87171; }
+.pw-bar.medium { background:#fbbf24; }
+.pw-bar.strong { background:#34d399; }
+.pw-label {
+  font-size:.63rem; font-weight:600; letter-spacing:.5px;
+  color:rgba(123,167,194,0.45); transition:color .3s;
+}
+.pw-label.weak   { color:#f87171; }
+.pw-label.medium { color:#fbbf24; }
+.pw-label.strong { color:#34d399; }
+
+/* ── CAPTCHA ── */
+.captcha-premium-wrapper {
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  background:#ffffff !important; border-radius:12px !important; padding:.6rem .8rem !important;
+  border:1px solid rgba(91,141,184,0.2) !important;
+  box-shadow:0 4px 20px rgba(4,13,26,0.3),0 0 0 1px rgba(255,255,255,0.05) !important;
+  transition:box-shadow .25s;
+}
+.captcha-premium-wrapper:hover {
+  box-shadow:0 6px 28px rgba(4,13,26,0.4),0 0 16px rgba(45,106,159,0.15) !important;
+}
+.animate-fade-in { animation:fadeInUp .5s .3s cubic-bezier(.19,1,.22,1) both; }
+
+/* ── BUTTON ── */
+.glass-btn {
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  gap:.5rem !important; width:100% !important; padding:.85rem 1.5rem !important;
+  border-radius:14px !important; border:none !important;
+  background:linear-gradient(135deg,#1e6fa8 0%,#0f3d6b 100%) !important;
+  color:var(--white) !important; font-family:'Outfit',sans-serif !important;
+  font-size:.9rem !important; font-weight:600 !important; letter-spacing:.3px !important;
+  cursor:pointer !important; position:relative !important; overflow:hidden !important;
+  transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s !important;
+  box-shadow:0 4px 20px rgba(30,111,168,0.45),0 0 0 1px rgba(91,141,184,0.2),inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+.glass-btn::before {
+  content:''; position:absolute; top:0; left:-80%; width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+  transform:skewX(-15deg); transition:left .6s ease;
+}
+.glass-btn:hover {
+  transform:translateY(-3px) !important;
+  box-shadow:0 12px 40px rgba(30,111,168,0.55),0 0 40px rgba(45,106,159,0.3),inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+.glass-btn:hover::before { left:130%; }
+.glass-btn:active { transform:scale(.98) translateY(-1px) !important; }
+.glass-btn i { font-size:.85rem; transition:transform .25s cubic-bezier(.2,.8,.2,1); }
+.glass-btn:hover i { transform:translateX(5px); }
+
+/* ── FOOTER ── */
+.auth-footer { border-top:1px solid rgba(91,141,184,0.1); text-align:center; }
+.auth-footer p { font-size:.78rem; color:rgba(123,167,194,0.6) !important; }
+.footer-link { color:var(--blue-grey) !important; text-decoration:none !important; font-weight:500; transition:color .2s; position:relative; }
+.footer-link::after { content:''; position:absolute; left:0; bottom:-1px; width:0; height:1px; background:var(--light-blue); transition:width .25s; }
+.footer-link:hover { color:var(--light-blue) !important; }
+.footer-link:hover::after { width:100%; }
+.text-primary { color:var(--light-blue) !important; }
+.text-muted   { color:rgba(123,167,194,0.5) !important; }
+.text-danger  { color:#f87171 !important; font-size:.74rem; }
+
+/* ── STAGGER ── */
+.auth-card form > div,
+.auth-card .auth-footer { opacity:0; animation:fadeInUp .5s cubic-bezier(.19,1,.22,1) forwards; }
+.auth-card form > div:nth-child(1){animation-delay:.2s;}
+.auth-card form > div:nth-child(2){animation-delay:.27s;}
+.auth-card form > div:nth-child(3){animation-delay:.34s;}
+.auth-card form > div:nth-child(4){animation-delay:.41s;}
+.auth-card form > div:nth-child(5){animation-delay:.48s;}
+.auth-card form > div:nth-child(6){animation-delay:.55s;}
+.auth-card form > div:nth-child(7){animation-delay:.62s;}
+.auth-card .auth-footer{animation-delay:.68s;}
+@keyframes fadeInUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+
+.mb-3 { margin-bottom:1rem !important; }
+.mb-4 { margin-bottom:1.2rem !important; }
+.py-3 { padding-top:1rem !important; padding-bottom:.5rem !important; }
+
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--navy-900); }
+::-webkit-scrollbar-thumb { background:var(--steel); border-radius:10px; }
+
+@media(max-width:800px) { .auth-left{display:none;} .auth-card{width:100%;max-width:440px;} }
+@media(max-width:480px) { .auth-card{padding:2rem 1.5rem 1.6rem;border-radius:20px;} .form-row-2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="noise"></div>
+<div class="vignette"></div>
+
+<div class="auth-page">
+  <div class="auth-wrap">
+
+    <!-- LEFT PANEL -->
+    <div class="auth-left">
+      <div class="brand-mark">
+        <div class="brand-icon-wrap">
+          <div class="brand-icon-bg"></div>
+          <i class="fas fa-brain"></i>
         </div>
-    </div>
-    
-    <div class="mb-3">
-        <label for="id_password2" class="form-label">Confirm Password</label>
-        <input type="password" class="form-control" id="id_password2" name="password2" required>
-    </div>
-    
-    <div class="mb-3">
-        <label for="captcha" class="form-label">Captcha</label>
-        <div class="input-group">
-            <input type="text" class="form-control" id="captcha" placeholder="Enter captcha" required>
-            <span class="input-group-text bg-light">
-                <strong>B4KP</strong>
-            </span>
-        </div>
-    </div>
-    
-    <div class="d-grid">
-        <button type="submit" class="btn btn-primary btn-lg">Join Neural Network</button>
-    </div>
-</form>
+        <div class="brand-name">Classroom <span>AI Monitor</span></div>
+      </div>
+      <div class="left-headline">
+        Initialize<br>
+        <span class="hl">Institutional</span><br>
+        Access
+      </div>
+      <p class="left-desc">
+        Create your secure educator account and gain access
+        to real-time classroom analytics, behavioral insights,
+        and engagement dashboards.
+      </p>
 
-<div class="auth-footer">
-    <p class="mb-0">
-        Already have an account? <a href="{% url 'login' %}">Login here</a>
-    </p>
+      <div class="onboard-steps">
+        <div class="step-item">
+          <div class="step-num">01</div>
+          <div class="step-text">
+            <strong>Create Credentials</strong>
+            <span>Set up your institutional username and secure password</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">02</div>
+          <div class="step-text">
+            <strong>Verify Identity</strong>
+            <span>Complete CAPTCHA verification for account security</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">03</div>
+          <div class="step-text">
+            <strong>Access Dashboard</strong>
+            <span>Start monitoring classroom engagement in real-time</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="left-pills">
+        <div class="pill"><i class="fas fa-shield-halved"></i> AES-256 Encrypted</div>
+        <div class="pill"><i class="fas fa-lock"></i> FERPA Compliant</div>
+        <div class="pill"><i class="fas fa-user-shield"></i> Secure Access</div>
+        <div class="pill"><i class="fas fa-chart-line"></i> Live Analytics</div>
+      </div>
+    </div>
+
+    <!-- AUTH CARD -->
+    <div class="auth-card">
+      <div class="card-bottom-glow"></div>
+
+      <!-- Progress indicator -->
+      <div class="reg-progress">
+        <div class="prog-dot active"></div>
+        <div class="prog-dot idle"></div>
+        <div class="prog-dot idle"></div>
+      </div>
+
+      <div class="card-header-area">
+        <div class="card-eyebrow">New Registration</div>
+        <div class="card-title">Create your account</div>
+        <div class="card-sub">Join the institutional monitoring platform</div>
+      </div>
+
+      {% block auth_content %}
+
+      <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="id_username" class="form-label">Username</label>
+          <div class="input-wrap">
+            <i class="fas fa-at input-icon"></i>
+            <input type="text" class="form-control" id="id_username" name="username" required placeholder="Choose a username">
+            <span class="input-status" id="usernameStatus"></span>
+          </div>
+          <div class="form-text">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="id_email" class="form-label">Email Address</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" class="form-control" id="id_email" name="email" required placeholder="you@institution.edu">
+            <span class="input-status" id="emailStatus"></span>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="id_password1" class="form-label">Password</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" class="form-control" id="id_password1" name="password1" required placeholder="Create a strong password">
+          </div>
+          <div class="pw-strength-wrap">
+            <div class="pw-bars">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+              <div class="pw-bar" id="bar4"></div>
+            </div>
+            <span class="pw-label" id="pwLabel">At least 8 characters required</span>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="id_password2" class="form-label">Confirm Password</label>
+          <div class="input-wrap">
+            <i class="fas fa-shield-halved input-icon"></i>
+            <input type="password" class="form-control" id="id_password2" name="password2" required placeholder="Re-enter your password">
+            <span class="input-status" id="pw2Status"></span>
+          </div>
+        </div>
+
+        <div class="mb-4 text-center">
+          <div class="captcha-premium-wrapper animate-fade-in shadow-lg">
+            {{ form.captcha }}
+          </div>
+          {% if form.captcha.errors %}
+            <div class="text-danger small mt-2">
+              {{ form.captcha.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-4">
+          <button type="submit" class="glass-btn w-100 justify-content-center">
+            Create Institutional Account <i class="fas fa-user-plus ms-2"></i>
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-footer py-3">
+        <p class="mb-0 text-muted">
+          Already have an account? <a href="{% url 'login' %}" class="footer-link d-inline-block fw-bold text-primary">Login to Console</a>
+        </p>
+      </div>
+
+      {% endblock %}
+    </div>
+
+  </div>
 </div>
-{% endblock %}
 
+<script>
+(function(){
+  /* ── CANVAS BACKGROUND ── */
+  const canvas = document.getElementById('bgCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H;
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', ()=>{ resize(); initScene(); });
+  resize();
+
+  const COLS = [
+    'rgba(45,106,159,',
+    'rgba(91,141,184,',
+    'rgba(123,167,194,',
+    'rgba(30,73,118,',
+    'rgba(168,204,223,',
+  ];
+
+  class Particle {
+    constructor(){ this.reset(true); }
+    reset(initial){
+      this.x    = initial ? Math.random()*W : (Math.random()<.5 ? -5 : W+5);
+      this.y    = initial ? Math.random()*H : Math.random()*H;
+      this.r    = Math.random()*1.8+.4;
+      this.col  = COLS[Math.floor(Math.random()*COLS.length)];
+      this.vx   = (Math.random()-.5)*.4;
+      this.vy   = (Math.random()-.5)*.4;
+      this.a    = Math.random()*.5+.15;
+      this.life = 0;
+      this.maxL = 400+Math.random()*400;
+    }
+    update(){
+      this.x += this.vx; this.y += this.vy; this.life++;
+      if(this.life>this.maxL||this.x<-10||this.x>W+10||this.y<-10||this.y>H+10) this.reset(false);
+    }
+    draw(){
+      const fade = Math.min(this.life/60,1)*Math.min((this.maxL-this.life)/60,1);
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle = this.col+(this.a*fade)+')';
+      ctx.fill();
+    }
+  }
+
+  class Blob {
+    constructor(){ this.reset(); }
+    reset(){
+      this.x  = Math.random()*W;
+      this.y  = Math.random()*H;
+      this.rx = 200+Math.random()*280;
+      this.ry = 130+Math.random()*200;
+      this.col= COLS[Math.floor(Math.random()*COLS.length)];
+      this.a  = Math.random()*.04+.012;
+      this.vx = (Math.random()-.5)*.18;
+      this.vy = (Math.random()-.5)*.14;
+      this.angle= Math.random()*Math.PI*2;
+      this.va = (Math.random()-.5)*.003;
+    }
+    update(){
+      this.x+=this.vx; this.y+=this.vy; this.angle+=this.va;
+      if(this.x<-this.rx) this.x=W+this.rx;
+      if(this.x>W+this.rx) this.x=-this.rx;
+      if(this.y<-this.ry) this.y=H+this.ry;
+      if(this.y>H+this.ry) this.y=-this.ry;
+    }
+    draw(){
+      ctx.save();
+      ctx.translate(this.x,this.y);
+      ctx.rotate(this.angle);
+      const g = ctx.createRadialGradient(0,0,0,0,0,this.rx);
+      g.addColorStop(0,this.col+this.a+')');
+      g.addColorStop(1,this.col+'0)');
+      ctx.fillStyle=g;
+      ctx.scale(1,this.ry/this.rx);
+      ctx.beginPath(); ctx.arc(0,0,this.rx,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  let particles=[], blobs=[];
+  function initScene(){
+    particles = Array.from({length:100}, ()=>new Particle());
+    blobs     = Array.from({length:8},  ()=>new Blob());
+  }
+  initScene();
+
+  function drawConnections(){
+    const MAX=110;
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x;
+        const dy=particles[i].y-particles[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<MAX){
+          ctx.beginPath();
+          ctx.strokeStyle='rgba(91,141,184,'+(1-d/MAX)*0.07+')';
+          ctx.lineWidth=.5;
+          ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle='rgba(91,141,184,0.025)';
+    ctx.lineWidth=1;
+    const sp=55;
+    for(let x=0;x<W;x+=sp){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(let y=0;y<H;y+=sp){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+
+  function render(){
+    ctx.fillStyle='#040d1a';
+    ctx.fillRect(0,0,W,H);
+    blobs.forEach(b=>{ b.update(); b.draw(); });
+    drawGrid();
+    drawConnections();
+    particles.forEach(p=>{ p.update(); p.draw(); });
+    const g=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,Math.max(W,H)*.7);
+    g.addColorStop(0,'rgba(4,13,26,0)');
+    g.addColorStop(1,'rgba(4,13,26,0.5)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    requestAnimationFrame(render);
+  }
+  render();
+
+  /* ── INPUT LIFT ── */
+  document.querySelectorAll('.form-control').forEach(inp=>{
+    inp.addEventListener('focus', function(){
+      const wrap = this.closest('.mb-3');
+      if(wrap){ wrap.style.transition='transform .2s'; wrap.style.transform='translateY(-1px)'; }
+    });
+    inp.addEventListener('blur', function(){
+      const wrap = this.closest('.mb-3');
+      if(wrap) wrap.style.transform='translateY(0)';
+    });
+  });
+
+  /* ── RIPPLE ── */
+  const rs=document.createElement('style');
+  rs.textContent='@keyframes ripple{to{transform:scale(28);opacity:0;}}';
+  document.head.appendChild(rs);
+  document.querySelectorAll('.glass-btn').forEach(btn=>{
+    btn.addEventListener('click',function(e){
+      const r=document.createElement('span');
+      const rect=this.getBoundingClientRect();
+      Object.assign(r.style,{
+        position:'absolute',borderRadius:'50%',background:'rgba(255,255,255,0.22)',
+        width:'8px',height:'8px',top:(e.clientY-rect.top-4)+'px',left:(e.clientX-rect.left-4)+'px',
+        transform:'scale(0)',animation:'ripple .6s ease-out forwards',pointerEvents:'none'
+      });
+      this.appendChild(r);
+      setTimeout(()=>r.remove(),650);
+    });
+  });
+
+  /* ── PASSWORD STRENGTH ── */
+  const pw1     = document.getElementById('id_password1');
+  const pw2     = document.getElementById('id_password2');
+  const bars    = [document.getElementById('bar1'),document.getElementById('bar2'),document.getElementById('bar3'),document.getElementById('bar4')];
+  const pwLabel = document.getElementById('pwLabel');
+  const pw2Stat = document.getElementById('pw2Status');
+
+  function scorePassword(pw){
+    let score = 0;
+    if(pw.length >= 8)  score++;
+    if(pw.length >= 12) score++;
+    if(/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+    if(/[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+    return score;
+  }
+
+  pw1 && pw1.addEventListener('input', function(){
+    const val   = this.value;
+    const score = scorePassword(val);
+    bars.forEach(b=>{ b.className='pw-bar'; });
+
+    if(val.length === 0){
+      pwLabel.className='pw-label';
+      pwLabel.textContent='At least 8 characters required';
+      return;
+    }
+    if(score <= 1){
+      bars[0].classList.add('weak');
+      pwLabel.className='pw-label weak'; pwLabel.textContent='Weak — add length & symbols';
+    } else if(score === 2){
+      bars[0].classList.add('medium'); bars[1].classList.add('medium');
+      pwLabel.className='pw-label medium'; pwLabel.textContent='Fair — getting better';
+    } else if(score === 3){
+      bars[0].classList.add('strong'); bars[1].classList.add('strong'); bars[2].classList.add('strong');
+      pwLabel.className='pw-label strong'; pwLabel.textContent='Good — almost there';
+    } else {
+      bars.forEach(b=>b.classList.add('strong'));
+      pwLabel.className='pw-label strong'; pwLabel.textContent='Strong password ✓';
+    }
+    checkMatch();
+  });
+
+  function checkMatch(){
+    if(!pw2 || pw2.value.length === 0) return;
+    if(pw1.value === pw2.value){
+      pw2.classList.remove('is-invalid'); pw2.classList.add('is-valid');
+      pw2Stat.className='input-status valid'; pw2Stat.innerHTML='<i class="fas fa-check"></i>';
+    } else {
+      pw2.classList.remove('is-valid'); pw2.classList.add('is-invalid');
+      pw2Stat.className='input-status invalid'; pw2Stat.innerHTML='<i class="fas fa-times"></i>';
+    }
+  }
+  pw2 && pw2.addEventListener('input', checkMatch);
+
+  /* ── USERNAME VALIDATION ── */
+  const uname    = document.getElementById('id_username');
+  const uStat    = document.getElementById('usernameStatus');
+  uname && uname.addEventListener('input', function(){
+    const valid = /^[\w.@+-]{1,150}$/.test(this.value) && this.value.length > 0;
+    if(this.value.length === 0){ uStat.className='input-status'; this.classList.remove('is-valid','is-invalid'); return; }
+    if(valid){
+      this.classList.add('is-valid'); this.classList.remove('is-invalid');
+      uStat.className='input-status valid'; uStat.innerHTML='<i class="fas fa-check"></i>';
+    } else {
+      this.classList.add('is-invalid'); this.classList.remove('is-valid');
+      uStat.className='input-status invalid'; uStat.innerHTML='<i class="fas fa-times"></i>';
+    }
+  });
+
+  /* ── EMAIL VALIDATION ── */
+  const emailInp = document.getElementById('id_email');
+  const eStat    = document.getElementById('emailStatus');
+  emailInp && emailInp.addEventListener('input', function(){
+    if(this.value.length === 0){ eStat.className='input-status'; this.classList.remove('is-valid','is-invalid'); return; }
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value);
+    if(valid){
+      this.classList.add('is-valid'); this.classList.remove('is-invalid');
+      eStat.className='input-status valid'; eStat.innerHTML='<i class="fas fa-check"></i>';
+    } else {
+      this.classList.add('is-invalid'); this.classList.remove('is-valid');
+      eStat.className='input-status invalid'; eStat.innerHTML='<i class="fas fa-times"></i>';
+    }
+  });
+
+  /* ── PROGRESS DOTS — animate on field fill ── */
+  const dots = document.querySelectorAll('.prog-dot');
+  function updateProgress(){
+    const filled = [uname, emailInp].filter(f=>f && f.value.length > 0).length;
+    const pwFilled = pw1 && pw1.value.length >= 8;
+    dots[0].className = 'prog-dot ' + (filled > 0 ? 'done' : 'active');
+    dots[1].className = 'prog-dot ' + (filled >= 2 ? 'done' : filled > 0 ? 'active' : 'idle');
+    dots[2].className = 'prog-dot ' + (pwFilled ? 'done' : filled >= 2 ? 'active' : 'idle');
+  }
+  [uname, emailInp, pw1, pw2].forEach(f => f && f.addEventListener('input', updateProgress));
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

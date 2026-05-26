@@ -2,207 +2,613 @@
 
 {% block title %}Analytics - AI Classroom Engagement{% endblock %}
 
+{% block extra_css %}
+<style>
+:root {
+  --bg-base:      #D6E6F5;
+  --bg-mid:       #C2D8EE;
+  --fog:          #E0EDF7;
+  --white:        #FFFFFF;
+  --navy:         #1A3A5C;
+  --navy-mid:     #2B5282;
+  --navy-light:   #3A6FA8;
+  --steel:        #5B8DB8;
+  --steel-light:  #87B3D4;
+  --sky:          #A8CCE8;
+  --sky-light:    #C8E0F0;
+  --text-dark:    #1A3050;
+  --text-mid:     #3B6080;
+  --text-muted:   #7A9DB8;
+  --green:        #2E8B6A;
+  --green-bg:     rgba(46,139,106,0.1);
+  --red:          #C0392B;
+  --red-bg:       rgba(192,57,43,0.08);
+  --amber:        #B07A2A;
+  --amber-bg:     rgba(176,122,42,0.1);
+  --purple:       #6C5CE7;
+  --purple-bg:    rgba(108,92,231,0.1);
+  --teal:         #0891B2;
+  --teal-bg:      rgba(8,145,178,0.1);
+  --shadow-sm:    0 2px 12px rgba(26,58,92,0.07);
+  --shadow-md:    0 6px 24px rgba(26,58,92,0.11);
+  --shadow-lg:    0 16px 48px rgba(26,58,92,0.15);
+  --r:            14px;
+  --r-sm:         9px;
+  --r-lg:         20px;
+  --r-xl:         26px;
+  --font:         'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+body { background: var(--bg-base); color: var(--text-dark); font-family: var(--font); }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-mid); }
+::-webkit-scrollbar-thumb { background: var(--steel-light); border-radius: 10px; }
+
+.page { padding: 2rem 2.25rem 3rem; max-width: 1440px; margin: 0 auto; }
+
+/* Page Header */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem; }
+.page-header-left { display: flex; flex-direction: column; gap: .3rem; }
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: .42rem;
+  background: rgba(91,141,184,0.1); border: 1px solid rgba(91,141,184,0.22);
+  border-radius: 20px; padding: .22rem .75rem; font-size: .62rem; font-weight: 700;
+  color: var(--steel); letter-spacing: .5px; text-transform: uppercase; width: fit-content;
+}
+.page-title { font-family: var(--font-display); font-size: clamp(1.6rem,2.8vw,2.2rem); color: var(--text-dark); line-height: 1.15; }
+.page-sub { font-size: .82rem; color: var(--text-muted); line-height: 1.6; }
+.page-header-actions { display: flex; gap: .65rem; flex-wrap: wrap; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: .42rem; padding: .65rem 1.4rem;
+  border-radius: var(--r-sm); font-family: var(--font); font-size: .82rem; font-weight: 600;
+  text-decoration: none; cursor: pointer; border: none; transition: all .28s cubic-bezier(.2,.8,.2,1);
+  position: relative; overflow: hidden;
+}
+.btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.12); opacity: 0; transition: opacity .2s; }
+.btn:hover::after { opacity: 1; }
+.btn i { transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.btn:hover i { transform: scale(1.1); }
+.btn-primary { background: var(--navy); color: #fff; box-shadow: 0 4px 14px rgba(26,58,92,0.2); }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(26,58,92,0.28); }
+.btn-outline { background: var(--white); color: var(--navy); border: 1px solid rgba(91,141,184,0.28); box-shadow: var(--shadow-sm); }
+.btn-outline:hover { background: var(--fog); transform: translateY(-2px); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(192,57,43,0.2); }
+.btn-danger:hover { background: rgba(192,57,43,0.15); transform: translateY(-2px); }
+
+/* Empty State */
+.empty-banner {
+  background: var(--white); border: 1px dashed rgba(91,141,184,0.35);
+  border-radius: var(--r-lg); padding: 2.5rem; text-align: center;
+  margin-bottom: 1.75rem; box-shadow: var(--shadow-sm);
+}
+.empty-banner i { font-size: 2.5rem; color: var(--sky); margin-bottom: .9rem; display: block; }
+.empty-banner h5 { font-family: var(--font-display); font-size: 1.25rem; color: var(--navy); margin-bottom: .5rem; }
+.empty-banner p { font-size: .82rem; color: var(--text-muted); margin-bottom: 1.2rem; }
+
+/* KPI Row */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.kpi {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-lg); padding: 1.3rem 1.4rem;
+  position: relative; overflow: hidden;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;
+  box-shadow: var(--shadow-sm); cursor: default;
+}
+.kpi:hover { transform: translateY(-5px) scale(1.01); box-shadow: var(--shadow-md); border-color: rgba(91,141,184,0.28); }
+.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.kpi.k-blue::before { background: linear-gradient(90deg,var(--navy),var(--steel)); }
+.kpi.k-green::before { background: linear-gradient(90deg,var(--green),#52C99A); }
+.kpi.k-amber::before { background: linear-gradient(90deg,var(--amber),#D4A853); }
+.kpi.k-red::before { background: linear-gradient(90deg,var(--red),#E57366); }
+.kpi.k-purple::before { background: linear-gradient(90deg,var(--purple),#a29bfe); }
+.kpi.k-teal::before { background: linear-gradient(90deg,var(--teal),#22d3ee); }
+.kpi.k-steel::before { background: linear-gradient(90deg,var(--steel),var(--sky)); }
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .8rem; }
+.ki { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: .84rem; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+.kpi:hover .ki { transform: rotate(-8deg) scale(1.12); }
+.kv { font-family: var(--font-display); font-size: 2.2rem; line-height: 1; color: var(--text-dark); margin-bottom: .15rem; transition: color .3s; }
+.kpi:hover .kv { color: var(--navy); }
+.kl { font-size: .62rem; font-weight: 600; color: var(--text-muted); letter-spacing: .5px; text-transform: uppercase; }
+
+/* Engagement Banner */
+.eng-card {
+  background: linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 55%,var(--navy-light) 100%);
+  border-radius: var(--r-xl); padding: 2rem 2.5rem;
+  display: grid; grid-template-columns: auto 1fr;
+  align-items: center; gap: 2rem;
+  box-shadow: var(--shadow-lg); margin-bottom: 1.5rem;
+  position: relative; overflow: hidden;
+}
+.eng-card::before {
+  content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px;
+  background: radial-gradient(circle,rgba(168,204,232,0.1) 0%,transparent 70%); pointer-events: none;
+}
+.eng-val-wrap { text-align: center; }
+.eng-val { font-family: var(--font-display); font-size: 4rem; line-height: 1; color: var(--sky); }
+.eng-label { font-size: .6rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(168,204,232,0.55); margin-top: .25rem; }
+.eng-title { font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin-bottom: .45rem; }
+.eng-desc { font-size: .82rem; color: rgba(200,224,240,0.75); line-height: 1.7; margin-bottom: 1.1rem; }
+.track { height: 8px; background: rgba(168,204,232,0.18); border-radius: 10px; overflow: hidden; }
+.fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg,var(--sky),#fff); transition: width 1.8s cubic-bezier(.4,0,.2,1); width: 0; }
+.track-label { display: flex; justify-content: space-between; margin-top: .45rem; }
+.track-label span { font-size: .62rem; color: rgba(168,204,232,0.55); font-weight: 600; }
+
+/* Charts */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-bottom: 1.5rem; }
+.charts-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; margin-bottom: 1.5rem; }
+.charts-full { display: grid; grid-template-columns: 1fr; gap: 1.1rem; margin-bottom: 1.5rem; }
+.chart-card {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-lg); padding: 1.5rem 1.75rem;
+  box-shadow: var(--shadow-sm); transition: all .3s;
+}
+.chart-card:hover { box-shadow: var(--shadow-md); border-color: rgba(91,141,184,0.26); }
+.chart-card-hd {
+  display: flex; align-items: center; gap: .45rem;
+  font-size: .62rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 1rem;
+}
+.chart-card-hd i { font-size: .7rem; }
+
+/* Heatmap section */
+.heatmap-section {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-lg); padding: 1.75rem 2rem;
+  box-shadow: var(--shadow-sm); margin-bottom: 1.5rem; text-align: center;
+}
+.heatmap-section img { max-width: 100%; border-radius: var(--r); border: 1px solid rgba(91,141,184,0.14); }
+
+/* Neutral bar */
+.neutral-bar {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r); padding: 1rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;
+}
+.neutral-bar i { color: var(--text-muted); font-size: .88rem; flex-shrink: 0; }
+.neutral-bar p { font-size: .8rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+.neutral-bar p strong { color: var(--text-dark); }
+
+/* Animations */
+.fu { opacity: 0; transform: translateY(16px); animation: fadeUp .6s cubic-bezier(.19,1,.22,1) forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+.d1{animation-delay:.05s} .d2{animation-delay:.11s} .d3{animation-delay:.18s}
+.d4{animation-delay:.25s} .d5{animation-delay:.32s} .d6{animation-delay:.39s}
+.d7{animation-delay:.46s} .d8{animation-delay:.53s}
+
+/* Responsive */
+@media(max-width:1100px){ .kpi-row { grid-template-columns: repeat(2,1fr); } .charts-grid { grid-template-columns: 1fr; } .charts-grid-3 { grid-template-columns: 1fr; } }
+@media(max-width:700px){ .page { padding: 1rem 1rem 2rem; } .kpi-row { grid-template-columns: 1fr; } .eng-card { grid-template-columns: 1fr; text-align: center; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="animate-in">
-    <div class="glass-card mb-5">
-        <div class="text-center mb-5">
-            <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📊 Engagement Analytics</h1>
-            <p style="color: var(--text-muted);">Comprehensive behavior analysis and participation metrics.</p>
-        </div>
+<div class="page">
 
-        {% if message %}
-        <div class="glass-card mb-5" style="background: rgba(14, 165, 164, 0.1); border-color: rgba(14, 165, 164, 0.2); text-align: center;">
-            <h5 style="color: var(--primary); font-weight: 700; margin-bottom: 1.5rem;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                {{ message }}
-            </h5>
-            <a href="{% url 'videos:video_upload' %}" class="glass-btn">Upload Video Now</a>
-        </div>
-        {% endif %}
-
-        <!-- Statistics Grid -->
-        <div class="stats-grid mb-5">
-            <div class="glass-card stat-card-glass">
-                <span class="stat-emoji">👥</span>
-                <span class="stat-val" style="color: var(--primary);">{{ total_students }}</span>
-                <span class="stat-lab">Total Detected</span>
-            </div>
-            <div class="glass-card stat-card-glass">
-                <span class="stat-emoji">✅</span>
-                <span class="stat-val" style="color: #22c55e;">{{ attentive }}</span>
-                <span class="stat-lab">Attentive</span>
-            </div>
-            <div class="glass-card stat-card-glass">
-                <span class="stat-emoji">😴</span>
-                <span class="stat-val" style="color: #f59e0b;">{{ sleepy }}</span>
-                <span class="stat-lab">Sleepy</span>
-            </div>
-            <div class="glass-card stat-card-glass">
-                <span class="stat-emoji">👀</span>
-                <span class="stat-val" style="color: #ef4444;">{{ distracted }}</span>
-                <span class="stat-lab">Distracted</span>
-            </div>
-        </div>
-
-        <!-- Overall Score Section -->
-        <div class="glass-card mb-5" style="background: var(--glass-surface);">
-            <div class="row align-items-center">
-                <div class="col-md-4 text-center">
-                    <h5 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;">Engagement Score</h5>
-                    <div style="font-size: 3.5rem; font-weight: 900; color: var(--primary);">{{ engagement_percentage }}%</div>
-                </div>
-                <div class="col-md-8">
-                    <div class="progress" style="height: 24px; border-radius: 50px; background: rgba(0,0,0,0.05); padding: 4px;">
-                        <div id="engagementProgressBar" class="progress-bar" role="progressbar" style="border-radius: 50px; background: var(--primary); transition: width 1s ease;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Grid -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="glass-card h-100">
-                    <h5 style="font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 1.2rem;">📈</span> Behavior Distribution
-                    </h5>
-                    <div style="height: 300px;">
-                        <canvas id="pieChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="glass-card h-100">
-                    <h5 style="font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 1.2rem;">📉</span> Trends Over Time
-                    </h5>
-                    <div style="height: 300px;">
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Neutral Info Area -->
-        <div class="glass-card mb-5" style="background: rgba(14, 165, 164, 0.05); border-style: dashed; text-align: center; padding: 1.5rem;">
-            <p style="margin-bottom: 0px; color: var(--text-muted);">
-                <strong style="color: var(--primary);">😐 Neutral Students: {{ neutral }}</strong> — Participants in a stable, resting state who are neither explicitly focused nor disengaged.
-            </p>
-        </div>
-
-        <!-- Analysis Controls -->
-        {% if video %}
-        <div class="pt-5 mt-4" style="border-top: 1px solid var(--glass-border);">
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="{% url 'videos:video_export_csv' video.pk %}" class="glass-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m-7-5 4 4 4-4m-4-4v12"/></svg>
-                    Download CSV Report
-                </a>
-                <a href="{{ video.video_file.url }}" class="glass-btn glass-btn-outline">
-                    Preview Video
-                </a>
-                <a href="{% url 'videos:video_delete' video.pk %}" class="glass-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.2);" onclick="return confirm('Are you sure you want to permanently delete this analysis?');">
-                    Delete Data
-                </a>
-            </div>
-        </div>
-        {% endif %}
+  <!-- PAGE HEADER -->
+  <div class="page-header fu d1">
+    <div class="page-header-left">
+      <div class="page-eyebrow"><i class="fas fa-chart-line"></i>Neural Behavior Analysis</div>
+      <h1 class="page-title">{{ video_title|default:"Engagement Analytics" }}</h1>
+      <p class="page-sub">Comprehensive behavior distribution, engagement timeline, and session participation metrics.</p>
     </div>
-</div>
+    <div class="page-header-actions">
+      {% if data_type == 'video' and video %}
+      <a href="{% url 'videos:video_export_csv' video.pk %}" class="btn btn-outline"><i class="fas fa-file-csv"></i>Export CSV</a>
+      <a href="{{ video.video_file.url }}" class="btn btn-outline"><i class="fas fa-play-circle"></i>Preview Video</a>
+      <a href="javascript:void(0)" data-url="{% url 'videos:video_delete' video.pk %}" onclick="confirmDelete(this.dataset.url)" class="btn btn-danger"><i class="fas fa-trash-alt"></i>Delete Data</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  {% if message %}
+  <div class="empty-banner fu d2">
+    <i class="fas fa-info-circle"></i>
+    <h5>{{ message }}</h5>
+    <p>Upload a classroom session to begin neural behavior analysis.</p>
+    <a href="{% url 'videos:video_upload' %}" class="btn btn-primary"><i class="fas fa-cloud-upload-alt"></i>Upload Session</a>
+  </div>
+  {% endif %}
+
+  <!-- KPI ROW 1 -->
+  <div class="kpi-row">
+    <div class="kpi k-blue fu d2">
+      <div class="kpi-top"><div class="ki" style="background:rgba(26,58,92,0.08);color:var(--navy);"><i class="fas fa-users"></i></div></div>
+      <div class="kv">{{ total_students }}</div><div class="kl">Total Detected</div>
+    </div>
+    <div class="kpi k-green fu d3">
+      <div class="kpi-top"><div class="ki" style="background:var(--green-bg);color:var(--green);"><i class="fas fa-eye"></i></div></div>
+      <div class="kv">{{ attentive }}</div><div class="kl">Attentive</div>
+    </div>
+    <div class="kpi k-amber fu d4">
+      <div class="kpi-top"><div class="ki" style="background:var(--amber-bg);color:var(--amber);"><i class="fas fa-bed"></i></div></div>
+      <div class="kv">{{ sleepy }}</div><div class="kl">Sleepy</div>
+    </div>
+    <div class="kpi k-red fu d5">
+      <div class="kpi-top"><div class="ki" style="background:var(--red-bg);color:var(--red);"><i class="fas fa-exclamation-triangle"></i></div></div>
+      <div class="kv">{{ distracted }}</div><div class="kl">Distracted</div>
+    </div>
+  </div>
+
+  <!-- KPI ROW 2 -->
+  <div class="kpi-row">
+    <div class="kpi k-purple fu d3">
+      <div class="kpi-top"><div class="ki" style="background:var(--purple-bg);color:var(--purple);"><i class="fas fa-comments"></i></div></div>
+      <div class="kv">{{ talking|default:"0" }}</div><div class="kl">Talking</div>
+    </div>
+    <div class="kpi k-steel fu d4">
+      <div class="kpi-top"><div class="ki" style="background:rgba(91,141,184,0.1);color:var(--steel);"><i class="fas fa-mobile-alt"></i></div></div>
+      <div class="kv">{{ phone|default:"0" }}</div><div class="kl">Phone Usage</div>
+    </div>
+    <div class="kpi k-teal fu d5">
+      <div class="kpi-top"><div class="ki" style="background:var(--teal-bg);color:var(--teal);"><i class="fas fa-hand-paper"></i></div></div>
+      <div class="kv">{{ hand_raises|default:"0" }}</div><div class="kl">Hand Raises</div>
+    </div>
+    <div class="kpi k-blue fu d6">
+      <div class="kpi-top"><div class="ki" style="background:rgba(26,58,92,0.06);color:var(--text-muted);"><i class="fas fa-minus-circle"></i></div></div>
+      <div class="kv">{{ neutral|default:"0" }}</div><div class="kl">Neutral</div>
+    </div>
+  </div>
+
+  <!-- ENGAGEMENT INDEX -->
+  <div class="eng-card fu d3">
+    <div class="eng-val-wrap">
+      <div class="eng-val">{{ engagement_percentage }}%</div>
+      <div class="eng-label">Engagement Index</div>
+    </div>
+    <div class="eng-right">
+      <div class="eng-title">Session Performance Score</div>
+      <p class="eng-desc">Composite score derived from gaze vectors, posture landmarks, and attention duration mapping across all detected students in this session.</p>
+      <div class="track"><div class="fill" id="engFill"></div></div>
+      <div class="track-label"><span>0%</span><span>Target: 85%</span><span>100%</span></div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 1: Doughnut + Bar -->
+  <div class="charts-grid">
+    <div class="chart-card fu d4">
+      <div class="chart-card-hd"><i class="fas fa-chart-pie"></i>Behavior Distribution</div>
+      <div style="height:320px;"><canvas id="doughnutChart"></canvas></div>
+    </div>
+    <div class="chart-card fu d5">
+      <div class="chart-card-hd"><i class="fas fa-chart-bar"></i>Behavior Breakdown (Bar)</div>
+      <div style="height:320px;"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 2: Timeline + Radar + Polar -->
+  <div class="charts-grid-3">
+    <div class="chart-card fu d5">
+      <div class="chart-card-hd"><i class="fas fa-chart-line"></i>Engagement Timeline</div>
+      <div style="height:280px;"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="chart-card fu d6">
+      <div class="chart-card-hd"><i class="fas fa-compass"></i>Behavior Radar</div>
+      <div style="height:280px;"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="chart-card fu d7">
+      <div class="chart-card-hd"><i class="fas fa-bullseye"></i>Polar Area View</div>
+      <div style="height:280px;"><canvas id="polarChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 3: Horizontal Bar (full width) -->
+  <div class="charts-full">
+    <div class="chart-card fu d7">
+      <div class="chart-card-hd"><i class="fas fa-align-left"></i>Percentage Composition</div>
+      <div style="height:260px;"><canvas id="hBarChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- HEATMAP (if available) -->
+  {% if data_type == 'video' and video and video.heatmap_image %}
+  <div class="heatmap-section fu d7">
+    <div class="chart-card-hd" style="justify-content:center;"><i class="fas fa-fire"></i>Student Attention Heatmap</div>
+    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:1rem;">Red = high engagement &nbsp;·&nbsp; Yellow = medium &nbsp;·&nbsp; Blue = low / distracted zones.</p>
+    <img src="{{ video.heatmap_image.url }}" alt="Student attention heatmap" style="max-width:100%; border-radius:var(--r); border:1px solid rgba(91,141,184,0.14);">
+    <div style="margin-top:1.25rem;padding:1rem 1.25rem;background:var(--fog);border-radius:var(--r-sm);text-align:left;border:1px solid rgba(91,141,184,0.14); max-width: 640px; margin: 1.25rem auto 0;">
+      <h6 style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:.5rem;">Colormap Legend</h6>
+      <p style="font-size:.78rem;color:var(--text-mid);line-height:1.9;margin:0;">
+        <span style="display:inline-block;width:12px;height:12px;background:#e8251a;border-radius:2px;vertical-align:middle;margin-right:.45rem;"></span><strong>Red</strong> — Sustained high attention (attentive students)<br>
+        <span style="display:inline-block;width:12px;height:12px;background:#f5c518;border-radius:2px;vertical-align:middle;margin-right:.45rem;"></span><strong>Yellow</strong> — Moderate presence / neutral state<br>
+        <span style="display:inline-block;width:12px;height:12px;background:#1976d2;border-radius:2px;vertical-align:middle;margin-right:.45rem;"></span><strong>Blue</strong> — Low engagement, sleepy or distracted zones
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- NEUTRAL SUMMARY -->
+  <div class="neutral-bar fu d8">
+    <i class="fas fa-circle-info"></i>
+    <p><strong>Neutral State: {{ neutral|default:"0" }} students</strong> — Stable resting state, identifying participants with baseline engagement. These students are present and passively following session content.</p>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Hidden Delete Form -->
+<form id="hiddenDeleteForm" method="POST" style="display:none;">{% csrf_token %}</form>
+
+<script>
+function confirmDelete(url) {
+  if (confirm('Are you sure you want to delete this analysis data? This action cannot be undone.')) {
+    const form = document.getElementById('hiddenDeleteForm');
+    form.action = url;
+    form.submit();
+  }
+}
+</script>
 {% endblock %}
 
 {% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Update Progress Bar
-        setTimeout(() => {
-            document.getElementById('engagementProgressBar').style.width = '{{ engagement_percentage }}%';
-        }, 300);
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate engagement fill bar
+  setTimeout(() => {
+    document.getElementById('engFill').style.width = '{{ engagement_percentage|default:"0" }}%';
+  }, 400);
 
-        // Chart Data
-        const chartColors = {
-            primary: '#0EA5A4',
-            success: '#22C55E',
-            warning: '#F59E0B',
-            danger: '#EF4444',
-            muted: '#94A3B8'
-        };
+  // ═══════════════════════════════════════════
+  // DATA from Django context
+  // ═══════════════════════════════════════════
+  const attentiveVal  = Number('{{ attentive|default:"0" }}');
+  const sleepyVal     = Number('{{ sleepy|default:"0" }}');
+  const distractedVal = Number('{{ distracted|default:"0" }}');
+  const talkingVal    = Number('{{ talking|default:"0" }}');
+  const phoneVal      = Number('{{ phone|default:"0" }}');
+  const handRaiseVal  = Number('{{ hand_raises|default:"0" }}');
+  const neutralVal    = Number('{{ neutral|default:"0" }}');
+  const totalVal      = Number('{{ total_students|default:"0" }}');
 
-        const attentiveValue = Number('{{ attentive|default:"0" }}');
-        const sleepyValue = Number('{{ sleepy|default:"0" }}');
-        const distractedValue = Number('{{ distracted|default:"0" }}');
-        const neutralValue = Number('{{ neutral|default:"0" }}');
+  const labels = ['Attentive', 'Sleepy', 'Distracted', 'Talking', 'Phone', 'Hand Raises', 'Neutral'];
+  const dataValues = [attentiveVal, sleepyVal, distractedVal, talkingVal, phoneVal, handRaiseVal, neutralVal];
 
-        // Pie Chart
-        const pieCtx = document.getElementById('pieChart').getContext('2d');
-        new Chart(pieCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Attentive', 'Sleepy', 'Distracted', 'Neutral'],
-                datasets: [{
-                    data: [attentiveValue, sleepyValue, distractedValue, neutralValue],
-                    backgroundColor: [chartColors.success, chartColors.warning, chartColors.danger, chartColors.muted],
-                    borderWidth: 0,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            font: { size: 12, weight: '600' },
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim()
-                        }
-                    }
-                }
+  // Percentages
+  const total = dataValues.reduce((a,b) => a+b, 0) || 1;
+  const pctValues = dataValues.map(v => Math.round(v / total * 100));
+
+  // Color scheme
+  const colors = {
+    bg: ['#2E8B6A','#B07A2A','#C0392B','#6C5CE7','#5B8DB8','#0891B2','#7A9DB8'],
+    bgAlpha: ['rgba(46,139,106,0.15)','rgba(176,122,42,0.15)','rgba(192,57,43,0.15)','rgba(108,92,231,0.15)','rgba(91,141,184,0.15)','rgba(8,145,178,0.15)','rgba(122,157,184,0.15)'],
+    border: '#ffffff'
+  };
+
+  const defaultOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { font: { family: 'DM Sans', weight: '600', size: 11 }, padding: 14, usePointStyle: true, pointStyleWidth: 10 }
+      }
+    }
+  };
+
+  // ═══════════════════════════════════════════
+  // 1. DOUGHNUT CHART
+  // ═══════════════════════════════════════════
+  new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: dataValues,
+        backgroundColor: colors.bg,
+        borderWidth: 3,
+        borderColor: colors.border,
+        hoverOffset: 12
+      }]
+    },
+    options: {
+      ...defaultOpts,
+      cutout: '68%',
+      plugins: {
+        ...defaultOpts.plugins,
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ctx.label + ': ' + ctx.parsed + ' (' + pctValues[ctx.dataIndex] + '%)';
             }
-        });
+          }
+        }
+      }
+    }
+  });
 
-        // Line Chart
-        const lineCtx = document.getElementById('lineChart').getContext('2d');
-        const lineLabels = JSON.parse('{{ line_labels|default:"[]"|escapejs }}');
-        const lineValues = JSON.parse('{{ line_values|default:"[]"|escapejs }}');
-        
-        new Chart(lineCtx, {
-            type: 'line',
-            data: {
-                labels: lineLabels.length ? lineLabels : ["0m", "5m", "10m", "15m", "20m"],
-                datasets: [{
-                    label: 'Engagement %',
-                    data: lineValues.length ? lineValues : [70, 75, 65, 80, 85],
-                    borderColor: chartColors.primary,
-                    backgroundColor: 'rgba(14, 165, 164, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: chartColors.primary
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: { color: chartColors.muted }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: chartColors.muted }
-                    }
-                }
+  // ═══════════════════════════════════════════
+  // 2. BAR CHART (Vertical)
+  // ═══════════════════════════════════════════
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Students',
+        data: dataValues,
+        backgroundColor: colors.bg,
+        borderRadius: 8,
+        borderSkipped: false,
+        barPercentage: 0.65
+      }]
+    },
+    options: {
+      ...defaultOpts,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(26,58,92,0.06)' },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#7A9DB8', stepSize: 1 }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'DM Sans', size: 10, weight: '600' }, color: '#3B6080' }
+        }
+      }
+    }
+  });
+
+  // ═══════════════════════════════════════════
+  // 3. LINE CHART (Engagement Timeline)
+  // ═══════════════════════════════════════════
+  const lineLabels = JSON.parse('{{ line_labels|default:"[]"|escapejs }}');
+  const lineValues = JSON.parse('{{ line_values|default:"[]"|escapejs }}');
+
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: lineLabels,
+      datasets: [{
+        label: 'Engagement %',
+        data: lineValues,
+        borderColor: '#1A3A5C',
+        backgroundColor: 'rgba(26,58,92,0.08)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#1A3A5C',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7,
+        pointHoverBackgroundColor: '#1A3A5C'
+      }]
+    },
+    options: {
+      ...defaultOpts,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true, max: 100,
+          grid: { color: 'rgba(26,58,92,0.06)' },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#7A9DB8', callback: v => v + '%' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#7A9DB8' }
+        }
+      }
+    }
+  });
+
+  // ═══════════════════════════════════════════
+  // 4. RADAR CHART
+  // ═══════════════════════════════════════════
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'This Session',
+        data: pctValues,
+        backgroundColor: 'rgba(26,58,92,0.12)',
+        borderColor: '#1A3A5C',
+        borderWidth: 2,
+        pointBackgroundColor: colors.bg,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 8
+      }]
+    },
+    options: {
+      ...defaultOpts,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { font: { size: 9 }, color: '#7A9DB8', backdropColor: 'transparent', stepSize: 25 },
+          grid: { color: 'rgba(26,58,92,0.08)' },
+          pointLabels: { font: { family: 'DM Sans', size: 10, weight: '600' }, color: '#3B6080' }
+        }
+      }
+    }
+  });
+
+  // ═══════════════════════════════════════════
+  // 5. POLAR AREA CHART
+  // ═══════════════════════════════════════════
+  new Chart(document.getElementById('polarChart'), {
+    type: 'polarArea',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: dataValues,
+        backgroundColor: colors.bg.map(c => c + 'CC'),
+        borderColor: colors.bg,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      ...defaultOpts,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ctx.label + ': ' + ctx.parsed.r + ' students';
             }
-        });
-    });
+          }
+        }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: { font: { size: 9 }, color: '#7A9DB8', backdropColor: 'transparent' },
+          grid: { color: 'rgba(26,58,92,0.08)' }
+        }
+      }
+    }
+  });
+
+  // ═══════════════════════════════════════════
+  // 6. HORIZONTAL BAR (Percentage Composition)
+  // ═══════════════════════════════════════════
+  new Chart(document.getElementById('hBarChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '% of Total',
+        data: pctValues,
+        backgroundColor: colors.bg,
+        borderRadius: 6,
+        borderSkipped: false,
+        barPercentage: 0.6
+      }]
+    },
+    options: {
+      ...defaultOpts,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.parsed.x + '% (' + dataValues[ctx.dataIndex] + ' students)'; }
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true, max: 100,
+          grid: { color: 'rgba(26,58,92,0.06)' },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#7A9DB8', callback: v => v + '%' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'DM Sans', size: 11, weight: '600' }, color: '#3B6080' }
+        }
+      }
+    }
+  });
+});
 </script>
 {% endblock %}

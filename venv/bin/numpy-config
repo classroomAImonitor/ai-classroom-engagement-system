@@ -1,4 +1,6 @@
-#!/Users/mesadiq46gmail.com/Demo/MyProject/venv/bin/python3
+#!/bin/sh
+'''exec' "/Users/mesadiq46gmail.com/Downloads/sadiq 2/Demo/MyProject/venv/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys

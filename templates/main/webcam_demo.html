@@ -1,373 +1,942 @@
 {% extends "base.html" %}
 
-{% block title %}Webcam Demo - AI Classroom Engagement{% endblock %}
+{% block title %}Webcam Demo — Classroom AI Monitor{% endblock %}
 
 {% block extra_css %}
 <style>
-    .webcam-section {
-        position: relative;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        background: #000;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        border: 1px solid var(--glass-border);
-    }
+/* ══ PAGE LAYOUT ══ */
+.wc-page { display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; align-items: start; }
+
+/* ══ SECTION EYEBROW (matches dashboard hero-eyebrow) ══ */
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: .42rem;
+  background: rgba(26,58,92,0.07); border: 1px solid rgba(91,141,184,0.22);
+  border-radius: 20px; padding: .28rem .88rem;
+  font-size: .65rem; font-weight: 700; letter-spacing: .5px;
+  color: var(--text-mid); text-transform: uppercase; margin-bottom: .75rem;
+  width: fit-content;
+}
+.page-title {
+  font-family: var(--font-display); font-size: clamp(1.7rem,2.8vw,2.4rem);
+  color: var(--text-dark); line-height: 1.15; margin-bottom: .45rem;
+}
+.page-title .acc { color: var(--navy); }
+.page-sub { font-size: .85rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.75rem; }
+
+/* ══ CAMERA CARD ══ */
+.cam-card {
+  background: var(--white);
+  border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+.cam-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--navy), var(--steel), var(--sky));
+  z-index: 5;
+}
+
+/* Video wrapper — deep slate bg matching webcam "off" state */
+.cam-frame {
+  position: relative;
+  background: #0d1520;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+#webcam {
+  width: 100%; height: 100%; display: block;
+  object-fit: cover; transform: scaleX(-1);
+  opacity: 0.92;
+}
+#canvas-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; transform: scaleX(-1);
+}
+
+/* Scanline sweep */
+.scanline {
+  position: absolute; width: 100%; height: 1px;
+  background: rgba(168,204,232,0.12);
+  top: 0; z-index: 4;
+  animation: scan 9s linear infinite;
+}
+@keyframes scan { 0%{top:0} 100%{top:100%} }
+
+/* Corner brackets */
+.cam-corner {
+  position: absolute; width: 20px; height: 20px;
+  border-color: rgba(168,204,232,0.5); border-style: solid;
+  z-index: 5;
+}
+.cam-corner.tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; }
+.cam-corner.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; }
+.cam-corner.bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; }
+.cam-corner.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; }
+
+/* HUD badges (top bar inside camera) */
+.hud-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 14px 16px; z-index: 6; pointer-events: none;
+}
+.hud-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(13,21,32,0.72); backdrop-filter: blur(10px);
+  border: 1px solid rgba(168,204,232,0.2);
+  border-radius: var(--r-sm); padding: .3rem .75rem;
+  font-family: var(--font-mono); font-size: .6rem; font-weight: 500;
+  color: rgba(168,204,232,0.9); letter-spacing: .5px; pointer-events: auto;
+}
+.hud-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.hud-dot.red  { background: #ef4444; animation: pulse 1.4s infinite; }
+.hud-dot.green { background: #4ade80; animation: pulse 1.8s infinite; }
+.hud-dot.off  { background: #4b5563; }
+
+/* Loading overlay */
+#loading-overlay {
+  position: absolute; inset: 0; z-index: 10;
+  background: rgba(13,21,32,0.88); backdrop-filter: blur(6px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .85rem;
+}
+.load-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid rgba(168,204,232,0.15);
+  border-top-color: var(--sky); animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-txt {
+  font-family: var(--font-mono); font-size: .6rem; letter-spacing: 2px;
+  color: rgba(168,204,232,0.6); text-transform: uppercase;
+}
+
+/* Camera controls */
+.cam-controls {
+  display: flex; align-items: center; justify-content: center;
+  gap: .75rem; padding: 1.2rem 1.5rem;
+  border-top: 1px solid rgba(91,141,184,0.1);
+  background: var(--fog);
+}
+.ctrl-btn {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .6rem 1.35rem; border-radius: var(--r-sm);
+  font-family: var(--font); font-size: .8rem; font-weight: 700;
+  cursor: pointer; border: none; transition: all .28s cubic-bezier(.2,.8,.2,1);
+  position: relative; overflow: hidden;
+}
+.ctrl-btn::after {
+  content: '';
+  let currentRotation = 0;
+
+function rotateCamera() {
+    currentRotation = (currentRotation + 90) % 360;
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas-overlay');
+    const rotText = document.getElementById('rotation-text');
     
-    #webcam {
-        width: 100%;
-        height: auto;
-        display: block;
-        transform: scaleX(-1);
-    }
+    // Combine mirroring (scaleX-1) with rotation
+    let transform = 'scaleX(-1)';
+    if (currentRotation === 90) transform += ' rotate(90deg)';
+    if (currentRotation === 180) transform += ' rotate(180deg)';
+    if (currentRotation === 270) transform += ' rotate(270deg)';
     
-    #canvas-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        transform: scaleX(-1);
-    }
+    video.style.transform = transform;
+    canvas.style.transform = transform;
+    rotText.innerText = `${currentRotation}° Angle`;
     
-    .hud-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    
-    .hud-badge {
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 8px 16px;
-        border-radius: 50px;
-        color: #fff;
-        font-weight: 700;
-        font-size: 0.8rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .scanline {
-        position: absolute;
-        width: 100%;
-        height: 2px;
-        background: rgba(14, 165, 164, 0.2);
-        top: 0;
-        z-index: 5;
-        animation: scan 4s linear infinite;
-    }
-    
-    @keyframes scan {
-        0% { top: 0; }
-        100% { top: 100%; }
-    }
-    
-    .animate-pulse-view {
-        animation: pulse-view 2s infinite;
-    }
-    
-    @keyframes pulse-view {
-        0% { opacity: 0.8; }
-        50% { opacity: 0.4; }
-        100% { opacity: 0.8; }
-    }
+    // Also track rotation for the analysis logic if needed
+    window.cameraRotation = currentRotation;
+}
+background: rgba(255,255,255,0.14); opacity: 0; transition: opacity .2s;
+}
+.ctrl-btn:hover:not(:disabled)::after { opacity: 1; }
+.ctrl-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.ctrl-btn:active:not(:disabled) { transform: scale(.96); }
+.ctrl-btn:disabled { opacity: .38; cursor: not-allowed; }
+.ctrl-btn i { font-size: .72rem; transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+.ctrl-btn:hover:not(:disabled) i { transform: scale(1.18); }
+
+.cb-init  { background: var(--navy); color: #fff; box-shadow: 0 4px 14px rgba(26,58,92,0.22); }
+.cb-init:hover:not(:disabled) { background: var(--navy-mid); box-shadow: 0 8px 24px rgba(26,58,92,0.28); }
+.cb-scan  { background: linear-gradient(135deg,#2563EB,#3B82F6); color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.28); }
+.cb-scan:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(37,99,235,0.38); }
+.cb-reset { background: var(--white); color: var(--text-dark); border: 1px solid rgba(91,141,184,0.22); }
+.cb-reset:hover:not(:disabled) { border-color: rgba(91,141,184,0.4); }
+
+/* ══ STATS PANEL ══ */
+.stats-panel {
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-xl); padding: 1.5rem;
+  box-shadow: var(--shadow-md); position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.stats-panel::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg,var(--navy),var(--steel),var(--sky));
+}
+
+.sp-hd {
+  font-size: .58rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-muted);
+  display: flex; align-items: center; gap: .5rem;
+}
+
+/* Status row */
+.status-row {
+  background: var(--fog); border: 1px solid rgba(91,141,184,0.13);
+  border-radius: var(--r-sm); padding: .65rem .9rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+#status-dot { width: 8px; height: 8px; border-radius: 50%; background: #4b5563; flex-shrink: 0; transition: background .4s; }
+#status-text { font-size: .7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); transition: color .4s; }
+.status-row.online #status-dot  { background: #4ade80; animation: pulse 1.8s infinite; }
+.status-row.online #status-text { color: var(--green); }
+
+/* Big score box (like tele-panel ai-box) */
+.score-box {
+  background: linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
+  border-radius: var(--r); padding: 1.1rem; text-align: center;
+  box-shadow: 0 4px 14px rgba(26,58,92,0.18);
+}
+.score-val {
+  font-family: var(--font-display); font-size: 2.8rem; line-height: 1;
+  color: var(--sky); margin-bottom: .15rem; transition: all .4s;
+}
+.score-lbl { font-size: .55rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(168,204,232,0.52); }
+
+/* Face count duo (like tele-duo) */
+.sp-duo { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.sp-stat {
+  background: var(--fog); border: 1px solid rgba(91,141,184,0.13);
+  border-radius: var(--r-sm); padding: .85rem; text-align: center;
+}
+.sp-stat-lbl { font-size: .55rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: .3rem; }
+.sp-stat-val { font-family: var(--font-display); font-size: 1.9rem; line-height: 1; }
+.sp-stat-val.g { color: var(--green); }
+.sp-stat-val.r { color: var(--red); }
+.sp-stat-val.b { color: var(--navy); }
+
+/* Behavior bars */
+.beh-wrap { display: flex; flex-direction: column; gap: .65rem; }
+.beh-row { display: flex; flex-direction: column; gap: .25rem; }
+.beh-head { display: flex; justify-content: space-between; margin-bottom: .35rem; }
+.beh-label { font-size: .66rem; font-weight: 700; color: var(--text-mid); }
+.beh-pct { font-size: .66rem; font-weight: 700; }
+.beh-track { height: 6px; background: var(--fog); border-radius: 10px; overflow: hidden; border: 1px solid rgba(91,141,184,0.1); }
+.beh-fill { height: 100%; border-radius: 10px; width: 0; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.beh-fill.attentive { background: linear-gradient(90deg,var(--green),#52C99A); }
+.beh-fill.sleepy    { background: linear-gradient(90deg,var(--amber),#D4A853); }
+.beh-fill.distracted{ background: linear-gradient(90deg,var(--red),#E85A50); }
+.beh-fill.neutral   { background: linear-gradient(90deg,var(--steel),var(--steel-light)); }
+
+/* Inference log row */
+.infer-row {
+  background: var(--fog); border: 1px solid rgba(91,141,184,0.13);
+  border-radius: var(--r-sm); padding: .75rem .9rem;
+  display: flex; align-items: center; gap: .65rem;
+}
+.infer-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(26,58,92,0.08); border: 1px solid rgba(26,58,92,0.1);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--navy); font-size: .65rem; flex-shrink: 0;
+}
+.infer-txt { font-family: var(--font-mono); font-size: .62rem; color: var(--text-muted); line-height: 1.5; }
+#state-val { font-weight: 700; color: var(--text-dark); display: block; }
+
+/* ══ RESULT CARD ══ */
+#result-card {
+  display: none;
+  background: var(--white); border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-xl); padding: 1.5rem;
+  box-shadow: var(--shadow-md); position: relative; overflow: hidden;
+  text-align: center;
+}
+#result-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg,var(--green),#52C99A,var(--navy));
+}
+.res-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  background: var(--green-bg); border: 1px solid rgba(46,139,106,0.2);
+  border-radius: 20px; padding: .28rem .8rem;
+  font-size: .6rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--green); margin-bottom: .9rem;
+}
+.res-score { font-family: var(--font-display); font-size: 3.6rem; color: var(--navy); line-height: 1; margin-bottom: .2rem; }
+.res-lbl { font-size: .58rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+.res-summary { font-size: .8rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem; }
+#distribution-container { margin-bottom: 1.25rem; }
+
+/* ══ TIMER CHIP ══ */
+#countdown-timer {
+  display: none;
+  background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.28);
+  border-radius: 20px; padding: .28rem .75rem;
+  font-family: var(--font-mono); font-size: .65rem; font-weight: 700;
+  color: #3B82F6; align-items: center; gap: .4rem;
+}
+#countdown-timer.active { display: inline-flex; }
+
+/* ══ ANIMATIONS ══ */
+.fu { opacity:0; transform:translateY(16px); animation:fadeUp .6s cubic-bezier(.19,1,.22,1) forwards; }
+@keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+.d1{animation-delay:.05s} .d2{animation-delay:.12s} .d3{animation-delay:.2s}
+.d4{animation-delay:.28s} .d5{animation-delay:.36s}
+
+
+/* ══ LIVE HEATMAP PANEL ══ */
+.heatmap-panel {
+  background: var(--white);
+  border: 1px solid rgba(91,141,184,0.14);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+.heatmap-panel::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #2E8B6A, #1A3A5C, #C0392B);
+  z-index: 5;
+}
+.hm-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.25rem 0.6rem;
+  font-size: .62rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.hm-header i { margin-right: .42rem; }
+.hm-legend { display: flex; align-items: center; gap: .85rem; }
+.hm-legend span { display: inline-flex; align-items: center; gap: .35rem; font-size: .6rem; font-weight: 700; }
+.hm-legend .dot-g { width: 9px; height: 9px; border-radius: 50%; background: #2E8B6A; }
+.hm-legend .dot-r { width: 9px; height: 9px; border-radius: 50%; background: #C0392B; }
+.hm-canvas-wrap {
+  position: relative; background: #0d1520;
+  aspect-ratio: 4/3;
+}
+#heatmap-canvas {
+  width: 100%; height: 100%; display: block;
+  filter: blur(18px) saturate(1.6);
+  opacity: 0.9;
+  transition: opacity 0.4s;
+}
+.hm-overlay-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: .5rem;
+  pointer-events: none;
+}
+.hm-overlay-label i { font-size: 1.75rem; color: rgba(168,204,232,0.22); }
+.hm-overlay-label p { font-size: .7rem; color: rgba(168,204,232,0.28); font-family: var(--font-mono); letter-spacing: 1px; margin: 0; }
+#hm-idle { display: flex; }
+#hm-scanning { display: none; position: absolute; top: 10px; right: 12px; background: rgba(13,21,32,0.75); border: 1px solid rgba(168,204,232,0.2); border-radius: var(--r-sm); padding: .28rem .65rem; font-size: .58rem; color: #4ade80; font-family: var(--font-mono); letter-spacing: 1px; }
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1000px) {
+  .wc-page { grid-template-columns: 1fr; }
+  .stats-panel, #result-card { max-width: 640px; margin: 0 auto; width: 100%; }
+}
+@media(max-width:600px) {
+  .cam-controls { flex-wrap: wrap; }
+  .ctrl-btn { flex: 1; justify-content: center; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="animate-in">
-    <div class="glass-card mb-5">
-        <div class="text-center mb-4">
-            <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📸 30s Real-time HUD</h1>
-            <p style="color: var(--text-muted);">Instant AI behavior analysis via your local camera device.</p>
-        </div>
 
-        <div class="row g-4">
-            <!-- Camera Column -->
-            <div class="col-lg-8">
-                <div class="webcam-section">
-                    <div class="scanline"></div>
-                    <video id="webcam" autoplay playsinline></video>
-                    <canvas id="canvas-overlay"></canvas>
-                    
-                    <div class="hud-overlay">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="hud-badge">
-                                <span class="animate-pulse-view" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
-                                LIVE FEED
-                            </div>
-                            <div id="countdown-timer" class="hud-badge" style="display: none; border-color: var(--primary);">
-                                <span id="timer-val">30s</span>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center" id="loading-overlay">
-                            <div class="spinner-border text-light mb-3" role="status"></div>
-                            <p class="text-light fw-bold">Connecting AI Lens...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-center gap-3 mt-4">
-                    <button id="start-btn" class="glass-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        Initialize Camera
-                    </button>
-                    <button id="record-btn" class="glass-btn" disabled>
-                        Start 30s Scan
-                    </button>
-                    <button id="stop-btn" class="glass-btn glass-btn-outline" disabled>
-                        Reset System
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stats Column -->
-            <div class="col-lg-4">
-                <!-- Live Stats -->
-                <div id="active-stats" class="glass-card h-100" style="background: var(--glass-surface);">
-                    <h5 style="font-weight: 800; margin-bottom: 1.5rem;">📊 Data Stream</h5>
-                    
-                    <div class="glass-card mb-4" style="background: rgba(0,0,0,0.05); text-align: center; border-style: dashed;">
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
-                            <div id="camera-status" style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8;"></div>
-                            <span id="status-text" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Offline</span>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="font-weight: 700; font-size: 0.8rem;">ENGAGEMENT</span>
-                            <span id="score-val" style="font-weight: 900; color: var(--primary);">0%</span>
-                        </div>
-                        <div class="progress" style="height: 12px; background: rgba(0,0,0,0.05); border-radius: 50px;">
-                            <div id="score-bar" class="progress-bar" style="width: 0%; background: var(--primary); border-radius: 50px;"></div>
-                        </div>
-                    </div>
-
-                    <div class="p-3 glass-card" style="background: var(--glass-surface); border-left: 4px solid var(--primary);">
-                        <small style="display: block; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Current Inference</small>
-                        <strong id="state-val" style="font-size: 1.1rem;">Waiting for signal...</strong>
-                    </div>
-                </div>
-
-                <!-- Result Card -->
-                <div id="result-card" class="glass-card h-100" style="display: none;">
-                    <h5 style="font-weight: 800; margin-bottom: 2rem;">📝 Scan Results</h5>
-                    
-                    <div class="text-center mb-4">
-                        <div style="font-size: 3rem; font-weight: 900; color: var(--primary);" id="final-score">0%</div>
-                        <small style="color: var(--text-muted); font-weight: 700;">AVG. PARTICIPATION</small>
-                    </div>
-
-                    <div id="distribution-container"></div>
-
-                    <div class="p-3 mt-4 glass-card" style="background: rgba(14, 165, 164, 0.05); font-size: 0.9rem;">
-                        <p id="analysis-summary" style="margin-bottom: 0; color: var(--text-muted);"></p>
-                    </div>
-
-                    <button id="reset-btn" class="glass-btn w-100 mt-4">Restart Scan</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Page header -->
+<div class="fu d1" style="margin-bottom:1.5rem;">
+  <div class="page-eyebrow"><i class="fas fa-satellite-dish"></i>Neural Vision Stream</div>
+  <h1 class="page-title">Real-Time <span class="acc">HUD</span> Analysis</h1>
+  <p class="page-sub">Neural hardware integration for high-precision student behaviour detection. Initialize the sensor, then run a 20-second scan to capture engagement data.</p>
 </div>
+
+<div class="wc-page">
+
+  <!-- ── LEFT: Camera column ── -->
+  <div style="display:flex;flex-direction:column;gap:1.1rem;">
+
+    <!-- Camera card -->
+    <div class="cam-card fu d2">
+      <div class="cam-frame" id="cam-frame">
+
+        <!-- Animated scanline -->
+        <div class="scanline"></div>
+
+        <!-- Corner brackets -->
+        <div class="cam-corner tl"></div>
+        <div class="cam-corner tr"></div>
+        <div class="cam-corner bl"></div>
+        <div class="cam-corner br"></div>
+
+        <!-- Video + Canvas -->
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="canvas-overlay"></canvas>
+
+        <!-- HUD top bar -->
+        <div class="hud-bar">
+          <div class="hud-badge">
+            <div class="hud-dot" id="hud-dot" style="background:#4b5563;"></div>
+            <span id="hud-feed-label">FEED_OFFLINE</span>
+          </div>
+          <div id="countdown-timer">
+            <i class="fas fa-stopwatch" style="font-size:.58rem;"></i>
+            <span id="timer-val">20s</span>
+          </div>
+        </div>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay">
+          <div class="load-ring"></div>
+          <div class="load-txt">Synchronizing AI Lens...</div>
+        </div>
+
+      </div><!-- /cam-frame -->
+
+      <!-- Controls -->
+      <div class="cam-controls">
+        <button id="start-btn" class="ctrl-btn cb-init">
+          <i class="fas fa-video"></i>Initialize
+        </button>
+        <button id="record-btn" class="ctrl-btn cb-scan" disabled>
+          <i class="fas fa-fingerprint"></i>Start Scan
+        </button>
+        <button id="stop-btn" class="ctrl-btn cb-reset" disabled>
+          <i class="fas fa-power-off"></i>Reset
+        </button>
+      </div>
+    </div><!-- /cam-card -->
+
+    <!-- Capability mini-strip (matches dashboard cap-card style) -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;" class="fu d4">
+      <div style="background:var(--white);border:1px solid rgba(91,141,184,0.14);border-radius:var(--r-lg);padding:1rem 1.1rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--navy),var(--steel));border-radius:0 3px 3px 0;"></div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--navy);margin-bottom:.25rem;"><i class="fas fa-eye" style="margin-right:.35rem;"></i>Gaze Tracking</div>
+        <div style="font-size:.68rem;color:var(--text-muted);line-height:1.55;">Ocular trajectory mapped at 30 fps.</div>
+      </div>
+      <div style="background:var(--white);border:1px solid rgba(91,141,184,0.14);border-radius:var(--r-lg);padding:1rem 1.1rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--green),#52C99A);border-radius:0 3px 3px 0;"></div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--green);margin-bottom:.25rem;"><i class="fas fa-person-running" style="margin-right:.35rem;"></i>Posture Detect</div>
+        <div style="font-size:.68rem;color:var(--text-muted);line-height:1.55;">Skeletal landmark fatigue analysis.</div>
+      </div>
+      <div style="background:var(--white);border:1px solid rgba(91,141,184,0.14);border-radius:var(--r-lg);padding:1rem 1.1rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--purple),#8B77C8);border-radius:0 3px 3px 0;"></div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--purple);margin-bottom:.25rem;"><i class="fas fa-shield-halved" style="margin-right:.35rem;"></i>AES-256 Encrypted</div>
+        <div style="font-size:.68rem;color:var(--text-muted);line-height:1.55;">All biometric data encrypted locally.</div>
+      </div>
+    </div>
+
+    <!-- ═══ LIVE HEATMAP PANEL ═══ -->
+    <div class="heatmap-panel fu d4" id="heatmap-panel">
+      <div class="hm-header">
+        <div><i class="fas fa-map-marked-alt"></i>Spatial Behavior Map</div>
+        <div class="hm-legend">
+          <span><div class="dot-g"></div>Engaged</span>
+          <span><div class="dot-r"></div>Distracted</span>
+        </div>
+      </div>
+      <div class="hm-canvas-wrap">
+        <canvas id="heatmap-canvas"></canvas>
+        <div class="hm-overlay-label" id="hm-idle">
+          <i class="fas fa-satellite-dish"></i>
+          <p>HEATMAP_STANDBY · START SCAN TO POPULATE</p>
+        </div>
+        <div id="hm-scanning"><i class="fas fa-circle" style="font-size:.5rem;animation:pulse 1s infinite;margin-right:.4rem;"></i>LIVE</div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- ── RIGHT: Stats + Result column ── -->
+  <div style="display:flex;flex-direction:column;gap:1.1rem;">
+
+    <!-- Stats panel -->
+    <div class="stats-panel fu d3" id="active-stats">
+
+      <div class="sp-hd">
+        <div class="live-dot" style="background:var(--steel-light);animation:none;" id="stream-dot"></div>
+        Neural Data Stream
+      </div>
+
+      <!-- Status row -->
+      <div class="status-row" id="status-row">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div id="status-dot"></div>
+          <span id="status-text">Offline</span>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:.58rem;color:var(--text-muted);">CAM_STREAM</div>
+      </div>
+
+      <!-- Engagement score (big box) -->
+      <div class="score-box">
+        <div class="score-val" id="score-val">0%</div>
+        <div class="score-lbl">Engagement Score</div>
+      </div>
+
+      <!-- Face count + fatigue count -->
+      <div class="sp-duo">
+        <div class="sp-stat">
+          <div class="sp-stat-lbl">Detected</div>
+          <div class="sp-stat-val g" id="face-count">0</div>
+        </div>
+        <div class="sp-stat">
+          <div class="sp-stat-lbl">Sleepy</div>
+          <div class="sp-stat-val r" id="sleepy-count">0</div>
+        </div>
+      </div>
+
+      <!-- Behavior bars -->
+      <div class="hud-left">
+      <div id="status-badge" class="hud-badge">
+        <div class="hud-dot off" id="hud-dot"></div>
+        <span id="hud-feed-label">FEED_OFFLINE</span>
+      </div>
+      <button onclick="rotateCamera()" class="hud-badge border-0" style="cursor:pointer; background:rgba(30,58,95,0.8); pointer-events: auto;">
+        <i class="fas fa-sync-alt"></i>
+        <span id="rotation-text">0° Angle</span>
+      </button>
+    </div>
+          <div class="beh-track"><div class="beh-fill attentive" id="attentive-bar"></div></div>
+        </div>
+        <div class="beh-row">
+          <div class="beh-head">
+            <span class="beh-label">Sleepy</span>
+            <span class="beh-pct" style="color:var(--amber);" id="sleepy-val">0%</span>
+          </div>
+          <div class="beh-track"><div class="beh-fill sleepy" id="sleepy-bar"></div></div>
+        </div>
+        <div class="beh-row">
+          <div class="beh-head">
+            <span class="beh-label">Distracted</span>
+            <span class="beh-pct" style="color:var(--red);" id="distracted-val">0%</span>
+          </div>
+          <div class="beh-track"><div class="beh-fill distracted" id="distracted-bar"></div></div>
+        </div>
+        <div class="beh-row">
+          <div class="beh-head">
+            <span class="beh-label">Neutral</span>
+            <span class="beh-pct" style="color:var(--steel);" id="neutral-val">0%</span>
+          </div>
+          <div class="beh-track"><div class="beh-fill neutral" id="neutral-bar"></div></div>
+        </div>
+        <div class="beh-row">
+          <div class="beh-head">
+            <span class="beh-label">Talking</span>
+            <span class="beh-pct" style="color:var(--purple);" id="talking-val">0%</span>
+          </div>
+          <div class="beh-track"><div class="beh-fill" style="background:var(--purple); width:0%" id="talking-bar"></div></div>
+        </div>
+        <div class="beh-row">
+          <div class="beh-head">
+            <span class="beh-label">Phone Usage</span>
+            <span class="beh-pct" style="color:var(--red);" id="phone-val">0%</span>
+          </div>
+          <div class="beh-track"><div class="beh-fill" style="background:#EF4444; width:0%" id="phone-bar"></div></div>
+        </div>
+      </div>
+
+      <!-- Inference log -->
+      <div class="infer-row">
+        <div class="infer-icon"><i class="fas fa-microchip"></i></div>
+        <div class="infer-txt">
+          <span id="state-val">Waiting for signal...</span>
+          INFERENCE_LOG · EDGE_NODE
+        </div>
+      </div>
+
+    </div><!-- /stats-panel -->
+
+    <!-- Result card (shown after scan) -->
+    <div id="result-card" class="fu d3">
+      <div class="res-badge"><i class="fas fa-check-circle"></i>Session Complete</div>
+      <div class="res-score" id="final-score">—</div>
+      <div class="res-lbl">Average Engagement</div>
+      <p class="res-summary" id="analysis-summary"></p>
+      <div id="distribution-container"></div>
+      <button id="reset-btn" class="ctrl-btn cb-init" style="width:100%;justify-content:center;">
+        <i class="fas fa-redo"></i>New Session
+      </button>
+    </div>
+
+  </div><!-- /right -->
+
+</div><!-- /wc-page -->
 {% endblock %}
 
+
 {% block extra_js %}
-<script type="module">
-    import {
-        FaceLandmarker,
-        FilesetResolver,
-        DrawingUtils
-    } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+<script>
+/* ── DOM refs ── */
+const video        = document.getElementById('webcam');
+const canvasOv     = document.getElementById('canvas-overlay');
+const startBtn     = document.getElementById('start-btn');
+const recordBtn    = document.getElementById('record-btn');
+const stopBtn      = document.getElementById('stop-btn');
+const resetBtn     = document.getElementById('reset-btn');
+const loadingOv    = document.getElementById('loading-overlay');
+const statusRow    = document.getElementById('status-row');
+const statusDot    = document.getElementById('status-dot');
+const statusText   = document.getElementById('status-text');
+const hudDot       = document.getElementById('hud-dot');
+const hudFeedLabel = document.getElementById('hud-feed-label');
+const streamDot    = document.getElementById('stream-dot');
+const countdownEl  = document.getElementById('countdown-timer');
+const timerValEl   = document.getElementById('timer-val');
+const activeStats  = document.getElementById('active-stats');
+const resultCard   = document.getElementById('result-card');
 
-    const video = document.getElementById('webcam');
-    const canvas = document.getElementById('canvas-overlay');
-    const ctx = canvas.getContext('2d');
-    const startBtn = document.getElementById('start-btn');
-    const recordBtn = document.getElementById('record-btn');
-    const stopBtn = document.getElementById('stop-btn');
-    const resetBtn = document.getElementById('reset-btn');
-    const countdownTimer = document.getElementById('countdown-timer');
-    const timerVal = document.getElementById('timer-val');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const statusIndicator = document.getElementById('camera-status');
-    const statusText = document.getElementById('status-text');
-    const scoreVal = document.getElementById('score-val');
-    const scoreBar = document.getElementById('score-bar');
-    const stateVal = document.getElementById('state-val');
+let stream = null, isScanning = false, timerInterval = null;
+let sessionScores = [], secondsLeft = 20;
+let currentRotation = 0;
+
+/* ── Live Heatmap refs and helpers ── */
+const hmCanvas   = document.getElementById('heatmap-canvas');
+const hmIdle     = document.getElementById('hm-idle');
+const hmScanning = document.getElementById('hm-scanning');
+const hmCtx      = hmCanvas.getContext('2d');
+hmCanvas.width   = 640;
+hmCanvas.height  = 480;
+hmCtx.fillStyle  = '#0d1520';
+hmCtx.fillRect(0, 0, hmCanvas.width, hmCanvas.height);
+
+function paintHeatmapSpot(x, y, w, h, isEngaged) {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const radius = Math.max(w, h) * 1.4;
+  const gradient = hmCtx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+  if (isEngaged) {
+    gradient.addColorStop(0, 'rgba(46, 180, 106, 0.55)');
+    gradient.addColorStop(0.5, 'rgba(46, 139, 106, 0.22)');
+    gradient.addColorStop(1, 'rgba(46, 139, 106, 0)');
+  } else {
+    gradient.addColorStop(0, 'rgba(220, 57, 43, 0.55)');
+    gradient.addColorStop(0.5, 'rgba(192, 57, 43, 0.22)');
+    gradient.addColorStop(1, 'rgba(192, 57, 43, 0)');
+  }
+  hmCtx.fillStyle = gradient;
+  hmCtx.beginPath();
+  hmCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+  hmCtx.fill();
+}
+
+function resetHeatmap() {
+  hmCtx.clearRect(0, 0, hmCanvas.width, hmCanvas.height);
+  hmCtx.fillStyle = '#0d1520';
+  hmCtx.fillRect(0, 0, hmCanvas.width, hmCanvas.height);
+  hmIdle.style.display = 'flex';
+  hmScanning.style.display = 'none';
+}
+
+
+function rotateCamera() {
+  currentRotation = (currentRotation + 90) % 360;
+  const videoEl = document.getElementById('webcam');
+  const overlayEl = document.getElementById('canvas-overlay');
+  const rotText = document.getElementById('rotation-text');
+  
+  // Combine mirroring (scaleX-1) with rotation
+  let transform = 'scaleX(-1)';
+  if (currentRotation === 90) transform += ' rotate(90deg)';
+  if (currentRotation === 180) transform += ' rotate(180deg)';
+  if (currentRotation === 270) transform += ' rotate(270deg)';
+  
+  videoEl.style.transform = transform;
+  overlayEl.style.transform = transform;
+  rotText.innerText = `${currentRotation}° Rotation`;
+}
+
+/* ── CSRF ── */
+function getCookie(name){
+  let v=null;
+  if(document.cookie&&document.cookie!==''){
+    for(const c of document.cookie.split(';')){
+      const t=c.trim();
+      if(t.startsWith(name+'=')){v=decodeURIComponent(t.slice(name.length+1));break;}
+    }
+  }
+  return v;
+}
+
+/* ── Set online / offline UI state ── */
+function setOnline(on){
+  statusRow.classList.toggle('online', on);
+  statusText.innerText = on ? 'Online' : 'Offline';
+  hudDot.style.background  = on ? '#4ade80' : '#4b5563';
+  hudDot.style.animation   = on ? 'pulse 1.8s infinite' : 'none';
+  hudFeedLabel.innerText   = on ? 'FEED_LIVE' : 'FEED_OFFLINE';
+  streamDot.style.background = on ? '#4ade80' : 'var(--steel-light)';
+  streamDot.style.animation  = on ? 'pulse 1.8s infinite' : 'none';
+}
+
+/* ── Init camera ── */
+async function initCamera(){
+  loadingOv.style.display = 'flex';
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{width:640,height:480}});
+    video.srcObject = stream;
+    video.onloadedmetadata = ()=>{
+      canvasOv.width  = video.videoWidth;
+      canvasOv.height = video.videoHeight;
+      loadingOv.style.display = 'none';
+    };
+    setOnline(true);
+    startBtn.disabled  = true;
+    recordBtn.disabled = false;
+    stopBtn.disabled   = false;
+    document.getElementById('state-val').innerText = 'Sensor synced. Ready to scan.';
+  }catch(err){
+    console.error(err);
+    alert('Could not access webcam. Please grant camera permission.');
+    loadingOv.style.display = 'none';
+  }
+}
+
+/* ── Capture + analyse frame ── */
+async function captureAndAnalyze(){
+  if(!isScanning) return;
+  const tmp = document.createElement('canvas');
+  tmp.width = video.videoWidth; tmp.height = video.videoHeight;
+  tmp.getContext('2d').drawImage(video,0,0);
+  const imageData = tmp.toDataURL('image/jpeg',0.5);
+  try{
+    const res  = await fetch('/live-analysis/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body: JSON.stringify({image:imageData})
+    });
     
-    const activeStats = document.getElementById('active-stats');
-    const resultCard = document.getElementById('result-card');
-    const finalScore = document.getElementById('final-score');
-    const analysisSummary = document.getElementById('analysis-summary');
-
-    let faceLandmarker;
-    let stream = null;
-    let lastVideoTime = -1;
-    let isRecording = false;
-    let recordedScores = [];
-    let stateHistory = { 'Attentive': 0, 'Sleepy': 0, 'Distracted': 0, 'Neutral': 0 };
-    let recordingTime = 30;
-    let timerInterval = null;
-    let animationId = null;
-
-    async function initializeFaceLandmarker() {
-        const filesetResolver = await FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
-        );
-        faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-            baseOptions: {
-                modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
-                delegate: "GPU"
-            },
-            outputFaceBlendshapes: true,
-            runningMode: "VIDEO",
-            numFaces: 1
-        });
+    if(!res.ok){
+      const errText = await res.text();
+      console.error('Analysis Server Error:', res.status, errText);
+      document.getElementById('state-val').innerText = 'ERROR: Server latency detected.';
+      throw new Error('Analysis failed');
     }
+    const data = await res.json();
+    if(data.success){ 
+      updateUI(data); 
+      if(isScanning) {
+          sessionScores.push(data.engagement);
+          // Accumulate behaviors
+          sessionData.attentive.push(data.attentive);
+          sessionData.sleepy.push(data.sleepy);
+          sessionData.distracted.push(data.distracted);
+          sessionData.neutral.push(data.neutral);
+          sessionData.talking.push(data.talking);
+          sessionData.phone.push(data.phone_usage);
+          if(data.hand_raises > 0) sessionData.hand_raises += data.hand_raises;
+      }
+    } else {
+      console.warn('Analysis returned failure:', data.error);
+    }
+  }catch(e){ 
+    console.error('Frame loop error:', e); 
+    document.getElementById('state-val').innerText = 'SYNC_ERROR: Re-establishing...';
+  }
+  if(isScanning) setTimeout(captureAndAnalyze, 1500); // Slightly faster interval permissible with singleton
+}
 
-    async function startCamera() {
-        try {
-            loadingOverlay.style.display = 'block';
-            if (!faceLandmarker) await initializeFaceLandmarker();
+/* ── Update stats panel UI ── */
+function updateUI(data){
+  /* score box */
+  document.getElementById('score-val').innerText = data.engagement+'%';
 
-            stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
-            video.srcObject = stream;
-            
-            video.onloadedmetadata = () => {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                loadingOverlay.style.display = 'none';
-                startBtn.disabled = true;
-                recordBtn.disabled = false;
-                stopBtn.disabled = false;
-                statusIndicator.style.background = '#22c55e';
-                statusIndicator.style.boxShadow = '0 0 10px #22c55e';
-                statusText.innerText = 'Connected';
-                detectFaces();
-            };
-        } catch (err) {
-            console.error("Camera error:", err);
+  /* face counts */
+  document.getElementById('face-count').innerText   = data.faces;
+  const sleepyCount = Math.round((data.sleepy/100)*data.faces);
+  document.getElementById('sleepy-count').innerText = sleepyCount;
+
+  /* canvas overlay */
+  const ctx = canvasOv.getContext('2d');
+  ctx.clearRect(0,0,canvasOv.width,canvasOv.height);
+  if(data.face_coords && data.face_coords.length>0){
+    data.face_coords.forEach((face)=>{
+      const [x,y,w,h] = face.box;
+      const label = face.label.toUpperCase();
+      
+      // Select color based on behavior
+      let color = '#2563EB'; // Default Blue
+      let icon = '';
+      if(label === 'TALKING') { color = '#8B5CF6'; icon = '💬 '; }
+      else if(label === 'PHONE') { color = '#EF4444'; icon = '📱 '; }
+      else if(label === 'SLEEPY') { color = '#F59E0B'; icon = '😴 '; }
+      else if(label === 'DISTRACTED') { color = '#6B7280'; icon = '⚠️ '; }
+      else if(label === 'ATTENTIVE') { color = '#10B981'; icon = '👁️ '; }
+
+      // Also check for global hand raising (simulated badge on first student if total > 0)
+      // This is a simplification for the demo
+      let finalLabel = icon + label;
+      if (data.hand_raises > 0 && face === data.face_coords[0]) {
+          finalLabel = '✋ RAISED HAND';
+          color = '#10B981';
+      }
+
+      ctx.lineWidth = 2.5; ctx.strokeStyle=color;
+      ctx.strokeRect(x,y,w,h);
+      
+      const tw = ctx.measureText(finalLabel).width;
+      ctx.save();
+      ctx.translate(x+w/2,y);
+      ctx.scale(-1,1);
+      ctx.font='700 11px "DM Sans",sans-serif';
+      ctx.fillStyle=color;
+      ctx.fillRect(-tw/2-10,-24,tw+20,22);
+      ctx.fillStyle='#fff';
+      ctx.fillText(finalLabel,-tw/2,-7);
+      ctx.restore();
+
+      // Accumulate on live heatmap canvas
+      if (isScanning) {
+        const isEngaged = (label === 'ATTENTIVE' || label === 'TALKING');
+        const isDistracted = (label === 'SLEEPY' || label === 'DISTRACTED' || label === 'PHONE');
+        if (isEngaged || isDistracted) {
+          paintHeatmapSpot(x, y, w, h, isEngaged);
         }
-    }
+      }
+    });
+  }
 
-    function startRecording() {
-        isRecording = true;
-        recordedScores = [];
-        stateHistory = { 'Attentive': 0, 'Sleepy': 0, 'Distracted': 0, 'Neutral': 0 };
-        recordingTime = 30;
-        
-        recordBtn.disabled = true;
-        countdownTimer.style.display = 'flex';
-        timerVal.innerText = '30s';
+  /* behaviour bars */
+  setBar('attentive', data.attentive);
+  setBar('sleepy',    data.sleepy);
+  setBar('distracted',data.distracted);
+  setBar('neutral',   data.neutral);
+  setBar('talking',   data.talking);
+  setBar('phone',     data.phone_usage);
 
-        timerInterval = setInterval(() => {
-            recordingTime--;
-            timerVal.innerText = recordingTime + 's';
-            if (recordingTime <= 0) finishScan();
-        }, 1000);
-    }
+  /* inference log / state update */
+  let stateMsg = 'STABLE: Monitoring...';
+  if(data.hand_raises > 0) stateMsg = 'ALERT: Hand Raised Detected';
+  else if(data.phone_usage > 0) stateMsg = 'WARNING: Distraction Detected';
+  else if(data.talking > 0) stateMsg = 'NOTICE: Active Communication';
+  document.getElementById('state-val').innerText = stateMsg;
+}
 
-    function finishScan() {
-        isRecording = false;
-        clearInterval(timerInterval);
-        countdownTimer.style.display = 'none';
-        
-        const avg = recordedScores.length > 0 ? Math.round(recordedScores.reduce((a,b)=>a+b,0)/recordedScores.length) : 0;
-        finalScore.innerText = avg + '%';
-        
-        activeStats.style.display = 'none';
-        resultCard.style.display = 'block';
-        analysisSummary.innerText = avg > 70 ? "The scan indicates high engagement levels with consistent ocular focus." : "The scan detected periods of fatigue or distraction during the window.";
-    }
+function setBar(id, pct){
+  document.getElementById(id+'-val').innerText = pct+'%';
+  document.getElementById(id+'-bar').style.width = pct+'%';
+}
 
-    function resetSystem() {
-        if (stream) {
-            stream.getTracks().forEach(t => t.stop());
-            video.srcObject = null;
-        }
-        cancelAnimationFrame(animationId);
-        clearInterval(timerInterval);
-        startBtn.disabled = false;
-        recordBtn.disabled = true;
-        stopBtn.disabled = true;
-        activeStats.style.display = 'block';
-        resultCard.style.display = 'none';
-        statusIndicator.style.background = '#94a3b8';
-        statusIndicator.style.boxShadow = 'none';
-        statusText.innerText = 'Offline';
-    }
+/* ── Start timed scan ── */
+function startTimedScan(){
+  if(isScanning) return;
+  isScanning = true; sessionScores = []; 
+  // Session Behavior Accumulators
+  sessionData = {
+    attentive: [], sleepy: [], distracted: [], 
+    neutral: [], talking: [], phone: [], hand_raises: 0
+  };
+  // Reset and activate heatmap
+  resetHeatmap();
+  hmIdle.style.display = 'none';
+  hmScanning.style.display = 'block';
+  secondsLeft = 20;
+  countdownEl.classList.add('active');
+  timerValEl.innerText = '20s';
+  recordBtn.innerHTML  = '<i class="fas fa-microscope"></i>Scanning…';
+  recordBtn.disabled   = true;
+  captureAndAnalyze();
+  timerInterval = setInterval(()=>{
+    secondsLeft--;
+    timerValEl.innerText = secondsLeft+'s';
+    if(secondsLeft<=0) stopTimedScan();
+  },1000);
+}
 
-    function detectFaces() {
-        if (video.currentTime !== lastVideoTime) {
-            lastVideoTime = video.currentTime;
-            if (faceLandmarker) {
-                const res = faceLandmarker.detectForVideo(video, performance.now());
-                renderResults(res);
-            }
-        }
-        animationId = requestAnimationFrame(detectFaces);
-    }
+/* ── Stop / finalise scan ── */
+async function stopTimedScan(){
+  clearInterval(timerInterval);
+  isScanning = false;
+  countdownEl.classList.remove('active');
 
-    function renderResults(res) {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        if (res.faceLandmarks.length > 0) {
-            const landmarks = res.faceLandmarks[0];
-            const shapes = {};
-            res.faceBlendshapes[0].categories.forEach(s => shapes[s.categoryName] = s.score);
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); video.srcObject=null; }
+  setOnline(false);
+  startBtn.disabled=false; recordBtn.disabled=true; stopBtn.disabled=true;
 
-            let score = 85;
-            let state = "Attentive";
-            let color = "#0EA5A4";
+  const avgScore = sessionScores.length>0
+    ? Math.round(sessionScores.reduce((a,b)=>a+b)/sessionScores.length) : 0;
 
-            if (shapes['eyeBlinkLeft'] > 0.4) { score = 30; state = "Sleepy"; color = "#f59e0b"; }
-            else if (shapes['eyeLookInLeft'] > 0.4) { score = 50; state = "Distracted"; color = "#ef4444"; }
+  // Helper to average and round
+  const avg = (arr) => arr.length > 0 ? Math.round(arr.reduce((a,b)=>a+b)/arr.length) : 0;
 
-            stateVal.innerText = state;
-            stateVal.style.color = color;
-            scoreVal.innerText = score + '%';
-            scoreBar.style.width = score + '%';
-            scoreBar.style.background = color;
+  const payload = {
+    engagement: avgScore,
+    attentive:  avg(sessionData.attentive),
+    sleepy:     avg(sessionData.sleepy),
+    distracted: avg(sessionData.distracted),
+    neutral:    avg(sessionData.neutral),
+    talking:    avg(sessionData.talking),
+    phone_usage:avg(sessionData.phone),
+    hand_raises:sessionData.hand_raises
+  };
 
-            if (isRecording) recordedScores.push(score);
+  try{
+    const r = await fetch('/save-session/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if(d.success) console.log('Session saved.');
+  }catch(e){ console.error(e); }
 
-            // HUD Overlays
-            const bounds = getBounds(landmarks);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.strokeRect(bounds.x, bounds.y, bounds.w, bounds.h);
-        }
-    }
+  /* Show result card */
+  activeStats.style.display = 'none';
+  resultCard.style.display  = 'block';
+  document.getElementById('final-score').innerText = avgScore+'%';
 
-    function getBounds(landmarks) {
-        let minX = 1, minY = 1, maxX = 0, maxY = 0;
-        landmarks.forEach(p => {
-            if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
-            if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
-        });
-        return {
-            x: minX * canvas.width, y: minY * canvas.height,
-            w: (maxX-minX) * canvas.width, h: (maxY-minY) * canvas.height
-        };
-    }
+  const isGood = avgScore>=70;
+  document.getElementById('analysis-summary').innerText = isGood
+    ? 'Excellent session. High neural synchronisation detected across the cohort. Data pushed to Reports.'
+    : 'Varied engagement levels recorded. Full breakdown available in the Reports dashboard.';
 
-    startBtn.addEventListener('click', startCamera);
-    recordBtn.addEventListener('click', startRecording);
-    stopBtn.addEventListener('click', resetSystem);
-    resetBtn.addEventListener('click', () => { resetSystem(); startCamera(); });
+  document.getElementById('distribution-container').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:.55rem;margin-bottom:.85rem;">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:.35rem;">
+          <span style="font-size:.66rem;font-weight:700;color:var(--text-mid);">Avg Engagement</span>
+          <span style="font-size:.66rem;font-weight:700;color:var(--navy);">${avgScore}%</span>
+        </div>
+        <div style="height:6px;background:var(--fog);border-radius:10px;overflow:hidden;border:1px solid rgba(91,141,184,0.1);">
+          <div style="height:100%;border-radius:10px;width:${avgScore}%;background:linear-gradient(90deg,var(--navy),var(--steel-light));"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.45rem;background:var(--green-bg);border:1px solid rgba(46,139,106,0.18);border-radius:var(--r-sm);padding:.6rem .85rem;">
+      <i class="fas fa-check-circle" style="color:var(--green);font-size:.75rem;"></i>
+      <span style="font-size:.7rem;font-weight:600;color:var(--green);">Session data saved to Global Reports.</span>
+    </div>
+  `;
+}
+
+/* ── Event listeners ── */
+startBtn.addEventListener('click', initCamera);
+recordBtn.addEventListener('click', startTimedScan);
+resetBtn.addEventListener('click', ()=>{
+  resultCard.style.display  = 'none';
+  activeStats.style.display = 'flex';
+  startBtn.disabled=false; recordBtn.disabled=true; stopBtn.disabled=true;
+  recordBtn.innerHTML = '<i class="fas fa-fingerprint"></i>Start Scan';
+  document.getElementById('face-count').innerText   = '0';
+  document.getElementById('sleepy-count').innerText = '0';
+  document.getElementById('score-val').innerText    = '0%';
+  ['attentive','sleepy','distracted','neutral'].forEach(id=>setBar(id,0));
+  document.getElementById('state-val').innerText    = 'Waiting for signal...';
+  setOnline(false);
+  resetHeatmap();
+});
+stopBtn.addEventListener('click', ()=>{
+  clearInterval(timerInterval); isScanning=false;
+  countdownEl.classList.remove('active');
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); video.srcObject=null; }
+  setOnline(false);
+  startBtn.disabled=false; recordBtn.disabled=true; stopBtn.disabled=true;
+  recordBtn.innerHTML='<i class="fas fa-fingerprint"></i>Start Scan';
+});
+
+/* ── Hide loading overlay on start ── */
+loadingOv.style.display = 'none';
 </script>
 {% endblock %}

@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-# from captcha.fields import CaptchaField  # Install django-simple-captcha if needed
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from .models import VideoUpload
 
 
@@ -41,6 +42,8 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -65,6 +68,8 @@ class LoginForm(forms.Form):
         })
     )
 
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -74,8 +79,11 @@ class LoginForm(forms.Form):
 class VideoForm(forms.ModelForm):
     class Meta:
         model = VideoUpload
-        fields = ['title', 'video_file']
+        fields = ['title', 'video_file', 'camera_angle']
         widgets = {
+            'camera_angle': forms.Select(attrs={
+                'class': 'form-select',
+            }),
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter video title'

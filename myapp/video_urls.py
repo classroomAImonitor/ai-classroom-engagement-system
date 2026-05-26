@@ -7,5 +7,6 @@ urlpatterns = [
     path('<int:pk>/update/', views.video_update, name='video_update'),
     path('<int:pk>/delete/', views.video_delete, name='video_delete'),
     path('<int:pk>/process/', views.video_process, name='video_process'),
+    path('<int:pk>/status/', views.video_status_api, name='video_status_api'),
     path('<int:pk>/export/', views.video_export_csv, name='video_export_csv'),
 ]

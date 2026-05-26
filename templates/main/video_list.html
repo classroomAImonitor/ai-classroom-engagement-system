@@ -1,65 +1,309 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Video List - AI Classroom Engagement{% endblock %}
+{% block title %}Video Management - AI Classroom Engagement{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-base:      #D6E6F5;
+        --bg-mid:       #C2D8EE;
+        --fog:          #E0EDF7;
+        --white:        #FFFFFF;
+        --navy:         #1A3A5C;
+        --navy-mid:     #2B5282;
+        --navy-light:   #3A6FA8;
+        --steel:        #5B8DB8;
+        --steel-light:  #87B3D4;
+        --sky:          #A8CCE8;
+        --sky-light:    #C8E0F0;
+        --text-dark:    #1A3050;
+        --text-mid:     #3B6080;
+        --text-muted:   #7A9DB8;
+        --green:        #2E8B6A;
+        --green-bg:     rgba(46,139,106,0.1);
+        --red:          #C0392B;
+        --red-bg:       rgba(192,57,43,0.08);
+        --amber:        #B07A2A;
+        --amber-bg:     rgba(176,122,42,0.1);
+        --shadow-sm:    0 2px 12px rgba(26,58,92,0.07);
+        --shadow-md:    0 6px 24px rgba(26,58,92,0.11);
+        --shadow-lg:    0 16px 48px rgba(26,58,92,0.15);
+        --r:            14px;
+        --r-sm:         9px;
+        --r-lg:         20px;
+        --r-xl:         26px;
+        --font:         'DM Sans', sans-serif;
+        --font-display: 'Playfair Display', serif;
+
+        /* legacy aliases used by template */
+        --bg-main:      var(--bg-base);
+        --panel-glass:  rgba(255,255,255,0.45);
+        --panel-border: rgba(91,141,184,0.18);
+        --text-primary: var(--text-dark);
+        --text-secondary: var(--text-muted);
+        --accent-blue:  #2563EB;
+        --accent-green: var(--green);
+        --soft-shadow:  var(--shadow-md);
+    }
+
+    body {
+        background-color: var(--bg-base);
+        color: var(--text-dark);
+        font-family: var(--font);
+    }
+
+    /* ── Claymorphism Card ── */
+    .clay-card {
+        background: var(--white);
+        border: 1px solid rgba(91,141,184,0.18);
+        border-radius: var(--r-xl);
+        box-shadow: var(--shadow-md);
+        padding: 2.5rem;
+    }
+
+    /* ── Table Surface ── */
+    .table-container {
+        background: var(--fog);
+        border-radius: var(--r-lg);
+        border: 1px solid rgba(91,141,184,0.15);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table thead th {
+        background: rgba(26,58,92,0.04);
+        color: var(--text-muted);
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        border-bottom: 1px solid rgba(91,141,184,0.15);
+        padding: 1rem;
+    }
+
+    .table tbody td {
+        padding: 1.2rem 1rem;
+        border-bottom: 1px solid rgba(91,141,184,0.07);
+        font-size: 0.88rem;
+        color: var(--text-mid);
+        background: transparent;
+    }
+
+    .table tbody tr {
+        transition: background 0.2s;
+    }
+
+    .table tbody tr:hover td {
+        background: var(--sky-light);
+    }
+
+    .table tbody tr:last-child td { border-bottom: none; }
+
+    /* ── Progress Bars ── */
+    .progress-track {
+        background: rgba(26,58,92,0.07);
+        border-radius: 50px;
+        height: 8px;
+        width: 100px;
+        overflow: hidden;
+        border: 1px solid rgba(91,141,184,0.12);
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--navy), var(--steel-light));
+        border-radius: 50px;
+        transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Action Buttons ── */
+    .action-btn {
+        background: var(--navy);
+        color: white !important;
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--r-sm);
+        font-weight: 600;
+        font-size: 0.82rem;
+        border: none;
+        transition: all 0.28s cubic-bezier(.2,.8,.2,1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 3px 10px rgba(26,58,92,0.18);
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: var(--navy-light);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(26,58,92,0.22);
+        color: white !important;
+    }
+
+    .btn-delete {
+        background: var(--fog);
+        color: var(--red) !important;
+        border: 1px solid rgba(192,57,43,0.2);
+        box-shadow: none;
+    }
+
+    .btn-delete:hover {
+        background: var(--red);
+        color: white !important;
+        border-color: var(--red);
+        box-shadow: 0 6px 16px rgba(192,57,43,0.25);
+    }
+
+    /* ── Status Badges ── */
+    .status-pill {
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @keyframes pulse-anim {
+        0% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.02); }
+        100% { opacity: 0.6; transform: scale(1); }
+    }
+    .Pulse {
+        animation: pulse-anim 2s infinite ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* ── Page heading ── */
+    .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .page-heading h1 {
+        font-family: var(--font-display);
+        font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+        color: var(--text-dark);
+    }
+
+    /* ── Video ID accent ── */
+    .video-id {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        color: var(--navy);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(26,58,92,0.03);
+        border: 2px dashed rgba(91,141,184,0.25);
+        border-radius: var(--r-lg);
+    }
+
+    .empty-state h5 {
+        font-family: var(--font-display);
+        color: var(--text-dark);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="animate-in">
-    <div class="glass-card mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container py-4">
+    <div class="clay-card">
+        <!-- HEADER SECTION -->
+        <div class="d-flex justify-content-between align-items-center mb-5 page-heading">
             <div>
-                <h1 style="font-weight: 900; color: var(--primary); margin-bottom: 0.5rem;">📁 Video Management</h1>
-                <p style="color: var(--text-muted); margin-bottom: 0;">Manage your classroom CCTV footage and AI analysis results.</p>
+                <h1 class="fw-bold mb-1">Video Management</h1>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">CCTV repository and neural analysis results.</p>
             </div>
-            <a href="{% url 'videos:video_upload' %}" class="glass-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5 5-5 5 5m-5-5v12"/></svg>
-                Upload New Video
+            <a href="{% url 'videos:video_upload' %}" class="action-btn">
+                <i class="fas fa-plus"></i> Upload Footage
             </a>
         </div>
 
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert" style="border-radius: var(--r-sm); font-size: 0.82rem;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% if videos %}
-            <div class="table-responsive glass-surface" style="border-radius: var(--radius-md); padding: 1rem;">
-                <table class="table table-hover align-middle" style="color: var(--text-main); margin-bottom: 0;">
-                    <thead style="border-bottom: 2px solid var(--glass-border);">
-                        <tr style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
-                            <th class="ps-3">ID</th>
+            <div class="table-responsive table-container">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Reference</th>
                             <th>Title</th>
-                            <th>Uploaded At</th>
+                            <th>Timestamp</th>
                             <th>Status</th>
                             <th>Engagement</th>
-                            <th class="text-end pe-3">Actions</th>
+                            <th class="text-end pe-4">Operations</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for video in videos %}
-                            <tr style="border-bottom: 1px solid var(--glass-border);">
-                                <td class="ps-3"><span style="font-weight: 700; color: var(--primary);">#{{ video.id }}</span></td>
-                                <td style="font-weight: 600;">{{ video.title|truncatewords:5 }}</td>
-                                <td style="font-size: 0.85rem; color: var(--text-muted);">{{ video.uploaded_at|date:"M d, Y H:i" }}</td>
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="video-id">#{{ video.id }}</span>
+                                </td>
+                                <td class="fw-semibold" style="color: var(--text-dark);">{{ video.title|default:"Unnamed Video"|truncatewords:5 }}</td>
+                                <td style="color: var(--text-muted); font-size: 0.82rem;">{{ video.uploaded_at|date:"M d, Y" }}</td>
                                 <td>
-                                    {% if video.processed %}
-                                        <span style="background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">✅ Processed</span>
+                                    {% if video.processing_status == "Completed" %}
+                                        <span class="status-pill" style="background: var(--green-bg); color: var(--green); border: 1px solid rgba(46,139,106,0.18);">Processed</span>
+                                    {% elif video.processing_status == "Processing" %}
+                                        <span class="status-pill Pulse" style="background: var(--sky-light); color: var(--navy); border: 1px solid rgba(26,58,92,0.18);">
+                                            <i class="fas fa-spinner fa-spin"></i> Processing...
+                                        </span>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;">Est: {{ video.estimated_time }}</div>
+                                    {% elif video.processing_status == "Failed" %}
+                                        <span class="status-pill" style="background: var(--red-bg); color: var(--red); border: 1px solid rgba(192,57,43,0.18);">Failed</span>
                                     {% else %}
-                                        <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">⏳ Pending</span>
+                                        <span class="status-pill" style="background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(176,122,42,0.18);">Pending</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if video.engagement_score %}
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="progress flex-grow-1" style="height: 8px; border-radius: 10px; background: rgba(0,0,0,0.05); overflow: hidden; width: 80px;">
-                                                <div class="progress-bar" style="width: {{ video.engagement_score|floatformat:0 }}%; background: var(--primary); border-radius: 10px;"></div>
+                                    {% if video.engagement_score is not None %}
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="progress-track">
+                                                <div class="progress-fill" data-width="{{ video.engagement_score|default_if_none:"0"|floatformat:1 }}%"></div>
                                             </div>
-                                            <span style="font-weight: 700; font-size: 0.85rem;">{{ video.engagement_score|floatformat:1 }}%</span>
+                                            <span class="fw-bold" style="font-size: 0.82rem; color: var(--navy);">{{ video.engagement_score|floatformat:1 }}%</span>
                                         </div>
                                     {% else %}
-                                        <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+                                        <span style="color: var(--text-muted); font-size: 0.82rem;">--</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end pe-3">
+                                <td class="text-end pe-4">
                                     <div class="d-flex justify-content-end gap-2">
-                                        {% if not video.processed %}
-                                            <a href="{% url 'videos:video_process' video.id %}" class="glass-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Process</a>
+                                        {% if video.processing_status == "Pending" or video.processing_status == "Failed" %}
+                                            <a href="{% url 'videos:video_process' video.id %}" class="action-btn py-1 px-3"
+                                               style="{% if video.processing_status == 'Failed' %}background:var(--red);{% endif %}">
+                                                {% if video.processing_status == "Failed" %}
+                                                    <i class="fas fa-redo small"></i> Retry
+                                                {% else %}
+                                                    <i class="fas fa-cogs small"></i> Process
+                                                {% endif %}
+                                            </a>
                                         {% endif %}
-                                        <a href="{% url 'videos:video_delete' video.id %}" class="glass-btn" style="padding: 0.4rem 1rem; font-size: 0.85rem; background: rgba(239, 68, 68, 0.1); color: #ef4444 !important; border-color: rgba(239, 68, 68, 0.2);">Delete</a>
+                                        <form action="{% url 'videos:video_delete' video.id %}" method="POST" onsubmit="return confirm('Delete this video and analysis?');" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="action-btn btn-delete py-1 px-3">
+                                                <i class="fas fa-trash-alt small"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -68,13 +312,61 @@
                 </table>
             </div>
         {% else %}
-            <div class="text-center py-5 glass-surface" style="border-radius: var(--radius-md);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📹</div>
-                <h4 style="font-weight: 800;">No footage uploaded</h4>
-                <p style="color: var(--text-muted); margin-bottom: 2rem;">Upload your classroom footage to begin AI engagement analysis.</p>
-                <a href="{% url 'videos:video_upload' %}" class="glass-btn">Upload First Video</a>
+            <!-- EMPTY STATE -->
+            <div class="empty-state">
+                <div class="display-4 mb-3" style="opacity: 0.25;">📹</div>
+                <h5 class="fw-bold mb-2">No footage found</h5>
+                <p style="color: var(--text-muted); font-size: 0.88rem;" class="mb-4">Your classroom repository is currently empty.</p>
+                <a href="{% url 'videos:video_upload' %}" class="action-btn">Upload First Video</a>
             </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.progress-fill').forEach(function(el) {
+            const width = el.getAttribute('data-width');
+            if (width) el.style.width = width;
+        });
+
+        // ── Real-Time Video Status Polling ──
+        const rows = document.querySelectorAll('tbody tr');
+        let hasProcessing = false;
+
+        rows.forEach(row => {
+            const statusCell = row.querySelector('.status-pill');
+            if (statusCell && statusCell.textContent.includes('Processing')) {
+                const videoIdSpan = row.querySelector('.video-id');
+                if (videoIdSpan) {
+                    const videoId = videoIdSpan.textContent.replace('#', '').trim();
+                    hasProcessing = true;
+                    startPolling(videoId);
+                }
+            }
+        });
+
+        function startPolling(videoId) {
+            const intervalId = setInterval(() => {
+                fetch(`/videos/${videoId}/status/`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('API error');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.processing_status === 'Completed' || data.processing_status === 'Failed') {
+                            clearInterval(intervalId);
+                            // Refresh page to populate all final statistics and operations
+                            window.location.reload();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Polling error for video ' + videoId + ':', err);
+                    });
+            }, 3000); // Check every 3 seconds
+        }
+    });
+</script>
 {% endblock %}

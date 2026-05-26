@@ -10,6 +10,7 @@ from . import views
 urlpatterns = [
     # Home
     path('', views.home, name='home'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 
     # Authentication
     path('login/', views.login_view, name='login'),
@@ -56,10 +57,19 @@ urlpatterns = [
 
     # Analytics
     path('analytics/', views.analytics, name='analytics'),
-    path('analytics/<int:pk>/', views.analytics, name='analytics_detail'),
+    path('analytics/<str:pk>/', views.analytics, name='analytics_detail'),
     path('reports/', views.reports, name='reports'),
+    path('reports/delete/<str:report_id>/', views.report_delete, name='report_delete'),
     path('about/', views.about, name='about'),
     path('webcam-demo/', views.webcam_demo, name='webcam_demo'),
 
     path('reports/export/', views.reports_export_csv, name='reports_export_csv'),
+    
+    # Resources & Compliance
+    path('docs/', views.technical_docs, name='technical_docs'),
+    path('privacy-protocol/', views.privacy_protocol, name='privacy_protocol'),
+    path('whitepaper/', views.research_whitepaper, name='research_whitepaper'),
+    path('live-analysis/', views.live_engagement_analysis, name='live_analysis'),
+    path('save-session/', views.save_webcam_session, name='save_webcam_session'),
+
 ]

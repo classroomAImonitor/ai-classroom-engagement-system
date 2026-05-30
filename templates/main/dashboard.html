@@ -742,6 +742,13 @@ footer { background:var(--white); border-top:1px solid rgba(91,141,184,0.14); pa
 </footer>
 
 <script>
+// Prevent browser caching on back button navigation (bfcache)
+window.addEventListener('pageshow', function (event) {
+  if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+    window.location.reload();
+  }
+});
+
 // Animate fill bar
 setTimeout(() => { document.getElementById('mfill').style.width = '{{ avg_attention }}%'; }, 400);
 

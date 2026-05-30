@@ -408,6 +408,13 @@
     </footer>
 
     <script>
+        // Prevent browser caching on back button navigation (bfcache)
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
+
         // Common Ripple Effect
         document.querySelectorAll('.action-btn, .btn, .nav-links a').forEach(function (btn) {
             btn.addEventListener('click', function (e) {

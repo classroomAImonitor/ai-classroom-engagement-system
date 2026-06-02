@@ -8,6 +8,7 @@ Django==5.2.13
 django-recaptcha==4.1.0
 flatbuffers==25.12.19
 fonttools==4.62.1
+gunicorn==26.0.0
 kiwisolver==1.5.0
 matplotlib==3.10.8
 mediapipe==0.10.5
@@ -25,3 +26,4 @@ six==1.17.0
 sounddevice==0.5.5
 sqlparse==0.5.5
 typing_extensions==4.15.0
+whitenoise==6.12.0

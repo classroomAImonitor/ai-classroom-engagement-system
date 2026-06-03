@@ -289,14 +289,15 @@
                                 <td class="text-end pe-4">
                                     <div class="d-flex justify-content-end gap-2">
                                         {% if video.processing_status == "Pending" or video.processing_status == "Failed" %}
-                                            <a href="{% url 'videos:video_process' video.id %}" class="action-btn py-1 px-3"
-                                               style="{% if video.processing_status == 'Failed' %}background:var(--red);{% endif %}">
-                                                {% if video.processing_status == "Failed" %}
+                                            {% if video.processing_status == "Failed" %}
+                                                <a href="{% url 'videos:video_process' video.id %}" class="action-btn py-1 px-3" style="background:var(--red);">
                                                     <i class="fas fa-redo small"></i> Retry
-                                                {% else %}
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'videos:video_process' video.id %}" class="action-btn py-1 px-3">
                                                     <i class="fas fa-cogs small"></i> Process
-                                                {% endif %}
-                                            </a>
+                                                </a>
+                                            {% endif %}
                                         {% endif %}
                                         <form action="{% url 'videos:video_delete' video.id %}" method="POST" onsubmit="return confirm('Delete this video and analysis?');" class="d-inline">
                                             {% csrf_token %}

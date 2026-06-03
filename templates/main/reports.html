@@ -341,7 +341,7 @@ body {
                 <a href="{% url 'analytics_detail' report.id %}?type={{ report.type }}" class="btn btn-primary" style="padding:.45rem .9rem;font-size:.72rem;">
                   <i class="fas fa-chart-pie"></i>Analytics
                 </a>
-                <button type="button" class="btn btn-danger" onclick="confirmDelete('{% url 'report_delete' report.id %}')" style="padding:.45rem .9rem;font-size:.72rem;">
+                <button type="button" class="btn btn-danger" onclick='confirmDelete("{% url "report_delete" report.id %}")' style="padding:.45rem .9rem;font-size:.72rem;">
                   <i class="fas fa-trash-alt"></i>Delete
                 </button>
               </div>

@@ -128,28 +128,7 @@
 }
 .ctrl-btn::after {
   content: '';
-  let currentRotation = 0;
-
-function rotateCamera() {
-    currentRotation = (currentRotation + 90) % 360;
-    const video = document.getElementById('webcam');
-    const canvas = document.getElementById('canvas-overlay');
-    const rotText = document.getElementById('rotation-text');
-    
-    // Combine mirroring (scaleX-1) with rotation
-    let transform = 'scaleX(-1)';
-    if (currentRotation === 90) transform += ' rotate(90deg)';
-    if (currentRotation === 180) transform += ' rotate(180deg)';
-    if (currentRotation === 270) transform += ' rotate(270deg)';
-    
-    video.style.transform = transform;
-    canvas.style.transform = transform;
-    rotText.innerText = `${currentRotation}° Angle`;
-    
-    // Also track rotation for the analysis logic if needed
-    window.cameraRotation = currentRotation;
-}
-background: rgba(255,255,255,0.14); opacity: 0; transition: opacity .2s;
+  background: rgba(255,255,255,0.14); opacity: 0; transition: opacity .2s;
 }
 .ctrl-btn:hover:not(:disabled)::after { opacity: 1; }
 .ctrl-btn:hover:not(:disabled) { transform: translateY(-2px); }
